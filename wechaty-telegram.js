@@ -419,7 +419,65 @@ class WechatyTelegramBot extends EventEmitter {
         return this._request('unbanChatMember', { form });
     }
 
-    // TODO: some APIs are not implemented
+    restrictChatMember(chatId, userId, form = {}) {
+        form.chat_id = chatId;
+        form.user_id = userId;
+        return this._request('restrictChatMember', { form });
+    }
+
+    promoteChatMember(chatId, userId, form = {}) {
+        form.chat_id = chatId;
+        form.user_id = userId;
+        return this._request('promoteChatMember', { form });
+    }
+
+    exportChatInviteLink(chatId, form = {}) {
+        form.chat_id = chatId;
+        return this._request('exportChatInviteLink', { form });
+    }
+
+    setChatPhoto(chatId, photo, options = {}) {
+        const opts = {
+            qs: options,
+        };
+        opts.qs.chat_id = chatId;
+        try {
+            const sendData = this._formatSendData('photo', photo);
+            opts.formData = sendData[0];
+            opts.qs.photo = sendData[1];
+        } catch (ex) {
+            return Promise.reject(ex);
+        }
+        return this._request('setChatPhoto', opts);
+    }
+
+    deleteChatPhoto(chatId, form = {}) {
+        form.chat_id = chatId;
+        return this._request('deleteChatPhoto', { form });
+    }
+
+    setChatTitle(chatId, title, form = {}) {
+        form.chat_id = chatId;
+        form.title = title;
+        return this._request('setChatTitle', { form })
+    }
+
+    setChatDescription(chatId, description, form = {}) {
+        form.chat_id = chatId;
+        form.description = description;
+        return this._request('setChatDescription', { form })
+    }
+
+    pinChatMessage(chatId, messageId, form = {}) {
+        form.chat_id = chatId;
+        form.message_id = messageId;
+        return this._request('pinChatMessage', { form });
+    }
+
+    unpinChatMessage(chatId, form = {}) {
+        form.chat_id = chatId;
+        return this._request('unpinChatMessage', { form });
+    }
 
     leaveChat(chatId) {
         const form = {
