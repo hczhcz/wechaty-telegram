@@ -55,6 +55,34 @@ class WechatyTelegramBot extends EventEmitter {
         return _messageTypes;
     }
 
+    static tgUser(user) {
+        //
+    }
+
+    static tgChatUser(room) {
+        //
+    }
+
+    static tgChatRoom(room) {
+        //
+    }
+
+    static tgMessage(message) {
+        //
+    }
+
+    static wxUser(user) {
+        //
+    }
+
+    static wxRoom(chat) {
+        //
+    }
+
+    static wxMessage(message) {
+        //
+    }
+
     // ======== initialization ========
 
     constructor(profile = null, options = {}) {
@@ -72,23 +100,84 @@ class WechatyTelegramBot extends EventEmitter {
             this.options.wechaty.scan(url, code);
         });
         this.wechaty.on('login', (user) => {
-            this.wechaty.user = user;
-            // TODO
+            // empty
         }).on('logout', (user) => {
-            this.wechaty.user = user;
-            // TODO
-        }).on('message', (msg) => {
-            // TODO
+            // empty
+        }).on('message', (message) => {
+            this.processUpdate({
+                update_id: WechatyTelegramBot.uniqueId,
+                message: WechatyTelegramBot.tgMessage(message),
+            });
         }).on('error', (err) => {
-            // TODO
-        }).on('friend', (user, req) => {
-            // TODO
-        }).on('room-join', (chat, invitees, inviter) => {
-            // TODO
-        }).on('room-leave', (chat, leavers) => {
-            // TODO
-        }).on('room-topic', (chat, newTitle, oldTitle, changer) => {
-            // TODO
+            if (this.listeners('polling_error').length) {
+                this.emit('polling_error', err);
+            } else if (this.listeners('webhook_error').length) {
+                this.emit('webhook_error', err);
+            } else {
+                console.error(err);
+            }
+        }).on('friend', (contact, request) => {
+            if (request && this.options.wechaty.autoFriend) {
+                request.accept();
+            }
+
+            this.processUpdate({
+                update_id: WechatyTelegramBot.uniqueId,
+                message: {
+                    message_id: WechatyTelegramBot.uniqueId,
+                    from: WechatyTelegramBot.tgUser(contact),
+                    date: Date.now(),
+                    chat: WechatyTelegramBot.tgChatUser(contact),
+                    text: '/start',
+                    entities: [{
+                        type: 'bot_command',
+                        offset: 0,
+                        length: 6,
+                    }],
+                },
+            });
+        }).on('room-join', (room, invitees, inviter) => {
+            const members = [];
+
+            invitees.forEach((invitee) => {
+                members.push(WechatyTelegramBot.tgUser(invitee));
+            });
+
+            this.processUpdate({
+                update_id: WechatyTelegramBot.uniqueId,
+                message: {
+                    message_id: WechatyTelegramBot.uniqueId,
+                    from: WechatyTelegramBot.tgUser(inviter),
+                    date: Date.now(),
+                    chat: WechatyTelegramBot.tgChatRoom(room),
+                    new_chat_member: members[0],
+                    new_chat_members: members,
+                },
+            });
+        }).on('room-leave', (room, leavers) => {
+            leavers.forEach((leaver) => {
+                this.processUpdate({
+                    update_id: WechatyTelegramBot.uniqueId,
+                    message: {
+                        message_id: WechatyTelegramBot.uniqueId,
+                        from: WechatyTelegramBot.tgUser(leaver), // notice: can not detect admin kicking
+                        date: Date.now(),
+                        chat: WechatyTelegramBot.tgChatRoom(room),
+                        left_chat_member: WechatyTelegramBot.tgUser(leaver),
+                    },
+                });
+            });
+        }).on('room-topic', (room, newTitle, oldTitle, changer) => {
+            this.processUpdate({
+                update_id: WechatyTelegramBot.uniqueId,
+                message: {
+                    message_id: WechatyTelegramBot.uniqueId,
+                    from: WechatyTelegramBot.tgUser(changer),
+                    date: Date.now(),
+                    chat: WechatyTelegramBot.tgChatRoom(room),
+                    new_chat_title: newTitle,
+                },
+            });
         });
 
         this._textRegexpCallbacks = [];
