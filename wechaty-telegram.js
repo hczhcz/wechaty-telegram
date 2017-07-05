@@ -43,7 +43,7 @@ class WechatyTelegramBot extends EventEmitter {
         return errors;
     }
 
-    static get _uniqueId() {
+    static get uniqueId() {
         const id = _lastId;
 
         _lastId = (_lastId + 1) | 0;
@@ -189,9 +189,7 @@ class WechatyTelegramBot extends EventEmitter {
             if (typeof autoStart === 'undefined' || autoStart === true) {
                 this.startPolling();
             }
-        }
-
-        if (options.webHook) {
+        } else if (options.webHook) {
             const autoOpen = options.webHook.autoOpen;
 
             if (typeof autoOpen === 'undefined' || autoOpen === true) {
@@ -289,7 +287,7 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     onReplyToMessage(chatId, messageId, callback) {
-        const id = WechatyTelegramBot._uniqueId;
+        const id = WechatyTelegramBot.uniqueId;
 
         this._replyListenerId += 1;
 
