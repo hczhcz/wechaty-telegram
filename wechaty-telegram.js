@@ -36,9 +36,19 @@ const _messageTypes = [
     'voice',
 ];
 
+let _lastId = 0;
+
 class WechatyTelegramBot extends EventEmitter {
     static get errors() {
         return errors;
+    }
+
+    static get _uniqueId() {
+        const id = _lastId;
+
+        _lastId = (_lastId + 1) | 0;
+
+        return id;
     }
 
     static get messageTypes() {
@@ -77,7 +87,6 @@ class WechatyTelegramBot extends EventEmitter {
         });
 
         this._textRegexpCallbacks = [];
-        this._replyListenerId = 1;
         this._replyListeners = [];
 
         if (options.polling) {
@@ -186,7 +195,7 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     onReplyToMessage(chatId, messageId, callback) {
-        const id = this._replyListenerId;
+        const id = WechatyTelegramBot._uniqueId;
 
         this._replyListenerId += 1;
 
