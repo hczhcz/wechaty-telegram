@@ -55,16 +55,21 @@ class WechatyTelegramBot extends EventEmitter {
         return _messageTypes;
     }
 
+    // ======== initialization ========
+
     constructor(profile = null, options = {}) {
         super();
 
         this.options = options;
         this.options.wechaty = this.options.wechaty || {};
         this.options.wechaty.profile = profile || this.options.wechaty.profile;
+        this.options.wechaty.scan = this.options.wechaty.scan || (url, code) => {
+            // TODO
+        };
 
         this.wechaty = new Wechaty(this.options.wechaty);
         this.wechaty.on('scan', (url, code) => {
-            this.emit('wechaty_scan', url, code);
+            this.options.wechaty.scan(url, code);
         });
         this.wechaty.on('login', (user) => {
             this.wechaty.user = user;
