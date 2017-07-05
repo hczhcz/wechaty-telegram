@@ -77,7 +77,7 @@ class WechatyTelegramBot extends EventEmitter {
         });
 
         this._textRegexpCallbacks = [];
-        this._replyListenerId = 0;
+        this._replyListenerId = 1;
         this._replyListeners = [];
 
         if (options.polling) {
@@ -162,6 +162,54 @@ class WechatyTelegramBot extends EventEmitter {
                 pending_update_count: 0,
             });
         });
+    }
+
+    // ======== customized events ========
+
+    onText(regexp, callback) {
+        this._textRegexpCallbacks.push({
+            regexp: regexp,
+            callback: callback,
+        });
+    }
+
+    removeTextListener(regexp) {
+        const index = this._textRegexpCallbacks.findIndex((textListener) => {
+            return textListener.regexp === regexp;
+        });
+
+        if (index >= 0) {
+            return this._textRegexpCallbacks.splice(index, 1)[0];
+        } else {
+            return null;
+        }
+    }
+
+    onReplyToMessage(chatId, messageId, callback) {
+        const id = this._replyListenerId;
+
+        this._replyListenerId += 1;
+
+        this._replyListeners.push({
+            id: id,
+            chatId: chatId,
+            messageId: messageId,
+            callback: callback,
+        });
+
+        return id;
+    }
+
+    removeReplyListener(replyListenerId) {
+        const index = this._replyListeners.findIndex((replyListener) => {
+            return replyListener.id === replyListenerId;
+        });
+
+        if (index >= 0) {
+            return this._replyListeners.splice(index, 1)[0];
+        } else {
+            return null;
+        }
     }
 
     // ======== updating ========
@@ -622,43 +670,6 @@ class WechatyTelegramBot extends EventEmitter {
                     })
                     .return(filePath);
             });
-    }
-
-    // ======== customized events ========
-
-    onText(regexp, callback) {
-        this._textRegexpCallbacks.push({ regexp, callback });
-    }
-
-    removeTextListener(regexp) {
-        const index = this._textRegexpCallbacks.findIndex((textListener) => {
-            return textListener.regexp === regexp;
-        });
-        if (index === -1) {
-            return null;
-        }
-        return this._textRegexpCallbacks.splice(index, 1)[0];
-    }
-
-    onReplyToMessage(chatId, messageId, callback) {
-        const id = ++this._replyListenerId;
-        this._replyListeners.push({
-            id,
-            chatId,
-            messageId,
-            callback
-        });
-        return id;
-    }
-
-    removeReplyListener(replyListenerId) {
-        const index = this._replyListeners.findIndex((replyListener) => {
-            return replyListener.id === replyListenerId;
-        });
-        if (index === -1) {
-            return null;
-        }
-        return this._replyListeners.splice(index, 1)[0];
     }
 }
 
