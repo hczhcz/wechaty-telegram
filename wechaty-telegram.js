@@ -3,7 +3,7 @@
 const fs = require('fs');
 
 const EventEmitter = require('events');
-const Wechaty = require('wechaty');
+const wechaty = require('wechaty');
 
 const errors = require('./errors');
 
@@ -36,7 +36,7 @@ const _messageTypes = [
     'voice',
 ];
 
-let _lastId = 0;
+let _lastId = Date.now();
 
 class WechatyTelegramBot extends EventEmitter {
     static get errors() {
@@ -91,13 +91,10 @@ class WechatyTelegramBot extends EventEmitter {
         this.options = options;
         this.options.wechaty = this.options.wechaty || {};
         this.options.wechaty.profile = profile || this.options.wechaty.profile;
-        this.options.wechaty.scan = this.options.wechaty.scan || (url, code) => {
-            // TODO
-        };
 
-        this.wechaty = new Wechaty(this.options.wechaty);
+        this.wechaty = new wechaty.Wechaty(this.options.wechaty);
         this.wechaty.on('scan', (url, code) => {
-            this.options.wechaty.scan(url, code);
+            // empty
         });
         this.wechaty.on('login', (user) => {
             // empty
