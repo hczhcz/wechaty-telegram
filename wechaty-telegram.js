@@ -61,19 +61,43 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     static tgUser(user) {
-        //
+        if (!user.alias().match(/#\d+/)) {
+            user.alias('#' + WechatyTelegramBot.uniqueId);
+        }
+
+        return {
+            id: parseInt(user.alias().slice(1), 10),
+            first_name: user.name(),
+            // username: user.weixin(),
+        };
     }
 
-    static tgChatUser(room) {
-        //
+    static tgChatUser(user) {
+        if (!user.alias().match(/#\d+/)) {
+            user.alias('#' + WechatyTelegramBot.uniqueId);
+        }
+
+        return {
+            id: parseInt(user.alias().slice(1), 10),
+            type: 'private',
+            first_name: user.name(),
+            // username: user.weixin(),
+        };
     }
 
     static tgChatRoom(room) {
-        //
-    }
+        let id = 1;
 
-    static tgMessage(message) {
-        //
+        if (!room.alias('bot').match(/#\d+/)) {
+            id = parseInt(room.alias('bot').slice(1), 10);
+        }
+
+        return {
+            id: -id,
+            type: 'group',
+            title: room.topic(),
+            all_members_are_administrators: false,
+        };
     }
 
     static wxUser(user) {
@@ -106,10 +130,21 @@ class WechatyTelegramBot extends EventEmitter {
         }).on('logout', (user) => {
             // empty
         }).on('message', (message) => {
-            this.processUpdate({
-                update_id: WechatyTelegramBot.uniqueId,
-                message: WechatyTelegramBot.tgMessage(message),
-            });
+            if (!message.self()) {
+                this.processUpdate({
+                    update_id: WechatyTelegramBot.uniqueId, // message.id?
+                    message: {
+                        message_id: WechatyTelegramBot.uniqueId,
+                        from: WechatyTelegramBot.tgUser(message.from()),
+                        date: Date.now(),
+                        chat: message.room()
+                            ? WechatyTelegramBot.tgChatRoom(message.room())
+                            : WechatyTelegramBot.tgChatUser(message.from()),
+                        text: message.content(),
+                        entities: [],
+                    },
+                });
+            }
         }).on('error', (err) => {
             if (this.listeners('polling_error').length) {
                 this.emit('polling_error', err);
