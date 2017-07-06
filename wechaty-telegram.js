@@ -119,30 +119,9 @@ class WechatyTelegramBot extends EventEmitter {
         // this.options.wechaty.autoFriend
 
         this.wechaty = new wechaty.Wechaty(this.options.wechaty);
-        this.wechaty.on('scan', (url, code) => {
-            // empty
-        });
-        this.wechaty.on('login', (user) => {
-            // empty
-        }).on('logout', (user) => {
-            // empty
-        }).on('message', (message) => {
-            if (!message.self()) {
-                this.processUpdate({
-                    update_id: WechatyTelegramBot.uniqueId, // message.id?
-                    message: {
-                        message_id: WechatyTelegramBot.uniqueId,
-                        from: WechatyTelegramBot.tgUser(message.from()),
-                        date: Date.now(),
-                        chat: message.room()
-                            ? WechatyTelegramBot.tgChatRoom(message.room())
-                            : WechatyTelegramBot.tgChatUser(message.from()),
-                        text: message.content(),
-                        entities: [],
-                    },
-                });
-            }
-        }).on('error', (err) => {
+
+        // other events: 'heartbeat', 'login', 'logout', 'scan'
+        this.wechaty.on('error', (err) => {
             if (this.listeners('polling_error').length) {
                 this.emit('polling_error', err);
             } else if (this.listeners('webhook_error').length) {
@@ -170,6 +149,35 @@ class WechatyTelegramBot extends EventEmitter {
                     }],
                 },
             });
+        }).on('message', (message) => {
+            if (!message.self()) {
+                const entities = [];
+
+                // notice: the other entities are not supported
+                //         the bot should parse the text by itself
+                message.mentioned().forEach((contact) => {
+                    entities.push({
+                        type: 'mention',
+                        offset: 0, // TODO
+                        length: 0, // TODO
+                        user: WechatyTelegramBot.tgUser(contact),
+                    });
+                });
+
+                this.processUpdate({
+                    update_id: WechatyTelegramBot.uniqueId, // message.id?
+                    message: {
+                        message_id: WechatyTelegramBot.uniqueId,
+                        from: WechatyTelegramBot.tgUser(message.from()),
+                        date: Date.now(),
+                        chat: message.room()
+                            ? WechatyTelegramBot.tgChatRoom(message.room())
+                            : WechatyTelegramBot.tgChatUser(message.from()),
+                        text: message.content(),
+                        entities: entities,
+                    },
+                });
+            }
         }).on('room-join', (room, invitees, inviter) => {
             const members = [];
 
@@ -421,7 +429,9 @@ class WechatyTelegramBot extends EventEmitter {
     // ======== methods: basic ========
 
     getMe() {
-        // TODO
+        return this.wechaty.self().then((user) => {
+            return WechatyTelegramBot.tgUser(user);
+        });
     }
 
     sendMessage(chatId, text, form = {}) {
