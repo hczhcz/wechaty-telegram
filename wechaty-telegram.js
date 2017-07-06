@@ -108,10 +108,6 @@ class WechatyTelegramBot extends EventEmitter {
         //
     }
 
-    static wxMessage(message) {
-        //
-    }
-
     // ======== initialization ========
 
     constructor(profile = null, options = {}) {
@@ -120,6 +116,7 @@ class WechatyTelegramBot extends EventEmitter {
         this.options = options;
         this.options.wechaty = this.options.wechaty || {};
         this.options.wechaty.profile = profile || this.options.wechaty.profile;
+        // this.options.wechaty.autoFriend
 
         this.wechaty = new wechaty.Wechaty(this.options.wechaty);
         this.wechaty.on('scan', (url, code) => {
@@ -585,8 +582,7 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     getFile(fileId) {
-        const form = { file_id: fileId };
-        return this._request('getFile', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     kickChatMember(chatId, userId) {
@@ -598,48 +594,27 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     unbanChatMember(chatId, userId) {
-        const form = {
-            chat_id: chatId,
-            user_id: userId
-        };
-        return this._request('unbanChatMember', { form });
+        // TODO: implement as inviting chat member
     }
 
     restrictChatMember(chatId, userId, form = {}) {
-        form.chat_id = chatId;
-        form.user_id = userId;
-        return this._request('restrictChatMember', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     promoteChatMember(chatId, userId, form = {}) {
-        form.chat_id = chatId;
-        form.user_id = userId;
-        return this._request('promoteChatMember', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     exportChatInviteLink(chatId, form = {}) {
-        form.chat_id = chatId;
-        return this._request('exportChatInviteLink', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     setChatPhoto(chatId, photo, options = {}) {
-        const opts = {
-            qs: options,
-        };
-        opts.qs.chat_id = chatId;
-        try {
-            const sendData = this._formatSendData('photo', photo);
-            opts.formData = sendData[0];
-            opts.qs.photo = sendData[1];
-        } catch (ex) {
-            return Promise.reject(ex);
-        }
-        return this._request('setChatPhoto', opts);
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     deleteChatPhoto(chatId, form = {}) {
-        form.chat_id = chatId;
-        return this._request('deleteChatPhoto', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     setChatTitle(chatId, title, form = {}) {
@@ -649,15 +624,11 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     setChatDescription(chatId, description, form = {}) {
-        form.chat_id = chatId;
-        form.description = description;
-        return this._request('setChatDescription', { form })
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     pinChatMessage(chatId, messageId, form = {}) {
-        form.chat_id = chatId;
-        form.message_id = messageId;
-        return this._request('pinChatMessage', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     unpinChatMessage(chatId, form = {}) {
@@ -702,86 +673,62 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     answerCallbackQuery(callbackQueryId, text, showAlert, form = {}) {
-        form.callback_query_id = callbackQueryId;
-        form.text = text;
-        form.show_alert = showAlert;
-        return this._request('answerCallbackQuery', { form });
+        // TODO: implement it with messages?
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     // ======== methods: updating messages ========
 
     editMessageText(text, form = {}) {
-        form.text = text;
-        return this._request('editMessageText', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     editMessageCaption(caption, form = {}) {
-        form.caption = caption;
-        return this._request('editMessageCaption', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     editMessageReplyMarkup(replyMarkup, form = {}) {
-        form.reply_markup = replyMarkup;
-        return this._request('editMessageReplyMarkup', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     deleteMessage(chatId, messageId, form = {}) {
-        form.chat_id = chatId;
-        form.message_id = messageId;
-        return this._request('deleteMessage', { form });
+        // TODO: recall the message?
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     // ======== methods: inline mode ========
 
     answerInlineQuery(inlineQueryId, results, form = {}) {
-        form.inline_query_id = inlineQueryId;
-        form.results = JSON.stringify(results);
-        return this._request('answerInlineQuery', { form });
+        // TODO: implement it with messages?
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     // ======== methods: payments ========
 
     sendInvoice(chatId, title, description, payload, providerToken, startParameter, currency, prices, form = {}) {
-        form.chat_id = chatId;
-        form.title = title;
-        form.description = description;
-        form.payload = payload;
-        form.provider_token = providerToken;
-        form.start_parameter = startParameter;
-        form.currency = currency;
-        form.prices = JSON.stringify(prices);
-        return this._request('sendInvoice', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     answerShippingQuery(shippingQueryId, ok, form = {}) {
-        form.shipping_query_id = shippingQueryId;
-        form.ok = ok;
-        return this._request('answerShippingQuery', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     answerPreCheckoutQuery(preCheckoutQueryId, ok, form = {}) {
-        form.pre_checkout_query_id = preCheckoutQueryId;
-        form.ok = ok;
-        return this._request('answerPreCheckoutQuery', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     // ======== methods: games ========
 
     sendGame(chatId, gameShortName, form = {}) {
-        form.chat_id = chatId;
-        form.game_short_name = gameShortName;
-        return this._request('sendGame', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     setGameScore(userId, score, form = {}) {
-        form.user_id = userId;
-        form.score = score;
-        return this._request('setGameScore', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     getGameHighScores(userId, form = {}) {
-        form.user_id = userId;
-        return this._request('getGameHighScores', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     // ======== file downloading ========
