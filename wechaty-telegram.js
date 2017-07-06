@@ -44,9 +44,14 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     static get uniqueId() {
-        const id = _lastId;
+        let id = Date.now();
 
-        _lastId = (_lastId + 1) | 0;
+        while (id === _lastId) {
+            // spin
+            id = Date.now();
+        }
+
+        _lastId = id;
 
         return id;
     }
