@@ -35,7 +35,6 @@ const _messageTypes = [
     'video_note',
     'voice',
 ];
-const _uniqueIdBufferSize = 1048576;
 
 class WechatyTelegramBot extends EventEmitter {
     static get errors() {
@@ -47,13 +46,7 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     _uniqueId(key, data) {
-        if (!this._uniqueIdBuffer[key]) {
-            this._uniqueIdBuffer[key] = {
-                last: Date.now() - 1,
-            };
-        }
-
-        const buffer = this._uniqueIdBuffer[key];
+        const buffer = this._buffers[key];
 
         while (Date.now() === buffer.last) {
             // spin
@@ -62,11 +55,10 @@ class WechatyTelegramBot extends EventEmitter {
 
         buffer.last += 1;
 
-        if (typeof data !== 'undefined') {
+        if (buffer.bufsize) {
             buffer[buffer.last] = data;
+            delete buffer[buffer.last - buffer.bufsize];
         }
-
-        delete buffer[buffer.last - _uniqueIdBufferSize];
 
         return buffer.last;
     }
@@ -249,7 +241,29 @@ class WechatyTelegramBot extends EventEmitter {
         this._textRegexpCallbacks = [];
         this._replyListeners = [];
 
-        this._uniqueIdBuffer = {};
+        this._buffers = {
+            user: {
+                last: Date.now() - 1,
+                bufsize: 65536,
+            },
+            room: {
+                last: Date.now() - 1,
+                bufsize: 65536,
+            },
+            update: {
+                last: Date.now() - 1,
+            },
+            message: {
+                last: Date.now() - 1,
+                bufsize: 1048576,
+            },
+            sysmessage: {
+                last: Date.now() - 1,
+            },
+            callback: {
+                last: Date.now() - 1,
+            },
+        };
 
         if (options.polling) {
             const autoStart = options.polling.autoStart;
