@@ -61,24 +61,34 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     static tgUser(user) {
-        if (!user.alias().match(/#\d+/)) {
-            user.alias('#' + WechatyTelegramBot.uniqueId);
+        let id;
+
+        if (user.alias().match(/^#\d+/)) {
+            id = parseInt(user.alias().slice(1), 10);
+        } else {
+            id = WechatyTelegramBot.uniqueId;
+            user.alias('#' + id);
         }
 
         return {
-            id: parseInt(user.alias().slice(1), 10),
+            id: id,
             first_name: user.name(),
             // username: user.weixin(),
         };
     }
 
     static tgChatUser(user) {
-        if (!user.alias().match(/#\d+/)) {
-            user.alias('#' + WechatyTelegramBot.uniqueId);
+        let id;
+
+        if (user.alias().match(/^#\d+/)) {
+            id = parseInt(user.alias().slice(1), 10);
+        } else {
+            id = WechatyTelegramBot.uniqueId;
+            user.alias('#' + id);
         }
 
         return {
-            id: parseInt(user.alias().slice(1), 10),
+            id: id,
             type: 'private',
             first_name: user.name(),
             // username: user.weixin(),
@@ -86,10 +96,12 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     static tgChatRoom(room) {
-        let id = 1;
+        let id;
 
-        if (!room.alias('bot').match(/#\d+/)) {
-            id = parseInt(room.alias('bot').slice(1), 10);
+        if (room.alias(this.wechaty.self()).match(/^#\d+/)) {
+            id = parseInt(room.alias(this.wechaty.self()).slice(1), 10);
+        } else {
+            id = parseInt(room.id.slice(-12), 16);
         }
 
         return {
