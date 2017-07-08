@@ -104,7 +104,8 @@ class WechatyTelegramBot extends EventEmitter {
         if (room.alias(this.wechaty.self()).match(/^#\d+/)) {
             id = parseInt(room.alias(this.wechaty.self()).slice(1), 10);
         } else {
-            id = parseInt(room.id.slice(-12), 16);
+            id = this._uniqueId('room', room);
+            // notice: not able to identify a chatroom automatically
         }
 
         return {
@@ -115,12 +116,31 @@ class WechatyTelegramBot extends EventEmitter {
         };
     }
 
-    _wxUser(user) {
+    _wxUser(userId) {
+        if (this._buffers.user[userId]) {
+            return new Promise((resolve, reject) => {
+                resolve(this._buffers.user[userId]);
+            });
+        } else {
+            return wechaty.Contact.find({
+                alias: '#' + userId,
+            });
+        }
         //
     }
 
-    _wxRoom(chat) {
-        //
+    _wxRoom(chatId) {
+        if (this._buffers.room[-chatId]) {
+            return new Promise((resolve, reject) => {
+                resolve(this._buffers.room[-chatId]);
+            });
+        } else {
+            return wechaty.Room.findAll().then((rooms) => {
+                rooms.find((room) => {
+                    return room.alias(this.wechaty.self()) === '#' + -chatId;
+                });
+            });
+        }
     }
 
     // ======== initialization ========
