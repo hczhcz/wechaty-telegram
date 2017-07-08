@@ -35,38 +35,49 @@ const _messageTypes = [
     'video_note',
     'voice',
 ];
-
-let _lastId = Date.now();
+const _uniqueIdBufferSize = 1048576;
 
 class WechatyTelegramBot extends EventEmitter {
     static get errors() {
         return errors;
     }
 
-    static get uniqueId() {
-        let id = Date.now();
-
-        while (id === _lastId) {
-            // spin
-            id = Date.now();
-        }
-
-        _lastId = id;
-
-        return id;
-    }
-
     static get messageTypes() {
         return _messageTypes;
     }
 
-    static tgUser(user) {
+    _uniqueId(key, data) {
+        if (!this._uniqueIdBuffer[key]) {
+            this._uniqueIdBuffer[key] = {
+                last: Date.now() - 1,
+            };
+        }
+
+        const buffer = this._uniqueIdBuffer[key];
+
+        while (Date.now() === buffer.last) {
+            // spin
+            // Date.now() should not be less than buffer.last
+        }
+
+        buffer.last += 1;
+
+        if (typeof data !== 'undefined') {
+            buffer[buffer.last] = data;
+        }
+
+        delete buffer[buffer.last - _uniqueIdBufferSize];
+
+        return buffer.last;
+    }
+
+    _tgUser(user) {
         let id;
 
         if (user.alias().match(/^#\d+/)) {
             id = parseInt(user.alias().slice(1), 10);
         } else {
-            id = WechatyTelegramBot.uniqueId;
+            id = this._uniqueId('user', user);
             user.alias('#' + id);
         }
 
@@ -77,13 +88,13 @@ class WechatyTelegramBot extends EventEmitter {
         };
     }
 
-    static tgChatUser(user) {
+    _tgChatUser(user) {
         let id;
 
         if (user.alias().match(/^#\d+/)) {
             id = parseInt(user.alias().slice(1), 10);
         } else {
-            id = WechatyTelegramBot.uniqueId;
+            id = this._uniqueId('user', user);
             user.alias('#' + id);
         }
 
@@ -95,7 +106,7 @@ class WechatyTelegramBot extends EventEmitter {
         };
     }
 
-    static tgChatRoom(room) {
+    _tgChatRoom(room) {
         let id;
 
         if (room.alias(this.wechaty.self()).match(/^#\d+/)) {
@@ -112,11 +123,11 @@ class WechatyTelegramBot extends EventEmitter {
         };
     }
 
-    static wxUser(user) {
+    _wxUser(user) {
         //
     }
 
-    static wxRoom(chat) {
+    _wxRoom(chat) {
         //
     }
 
@@ -147,12 +158,12 @@ class WechatyTelegramBot extends EventEmitter {
             }
 
             this.processUpdate({
-                update_id: WechatyTelegramBot.uniqueId,
+                update_id: this._uniqueId('update'),
                 message: {
-                    message_id: WechatyTelegramBot.uniqueId,
-                    from: WechatyTelegramBot.tgUser(contact),
+                    message_id: this._uniqueId('sysmessage'),
+                    from: this._tgUser(contact),
                     date: Date.now(),
-                    chat: WechatyTelegramBot.tgChatUser(contact),
+                    chat: this._tgChatUser(contact),
                     text: '/start',
                     entities: [{
                         type: 'bot_command',
@@ -172,19 +183,19 @@ class WechatyTelegramBot extends EventEmitter {
                         type: 'mention',
                         offset: 0, // TODO
                         length: 0, // TODO
-                        user: WechatyTelegramBot.tgUser(contact),
+                        user: this._tgUser(contact),
                     });
                 });
 
                 this.processUpdate({
-                    update_id: WechatyTelegramBot.uniqueId, // message.id?
+                    update_id: this._uniqueId('update'),
                     message: {
-                        message_id: WechatyTelegramBot.uniqueId,
-                        from: WechatyTelegramBot.tgUser(message.from()),
+                        message_id: this._uniqueId('message', message),
+                        from: this._tgUser(message.from()),
                         date: Date.now(),
                         chat: message.room()
-                            ? WechatyTelegramBot.tgChatRoom(message.room())
-                            : WechatyTelegramBot.tgChatUser(message.from()),
+                            ? this._tgChatRoom(message.room())
+                            : this._tgChatUser(message.from()),
                         text: message.content(),
                         // TODO: other content types
                         entities: entities,
@@ -195,16 +206,16 @@ class WechatyTelegramBot extends EventEmitter {
             const members = [];
 
             invitees.forEach((invitee) => {
-                members.push(WechatyTelegramBot.tgUser(invitee));
+                members.push(this._tgUser(invitee));
             });
 
             this.processUpdate({
-                update_id: WechatyTelegramBot.uniqueId,
+                update_id: this._uniqueId('update'),
                 message: {
-                    message_id: WechatyTelegramBot.uniqueId,
-                    from: WechatyTelegramBot.tgUser(inviter),
+                    message_id: this._uniqueId('sysmessage'),
+                    from: this._tgUser(inviter),
                     date: Date.now(),
-                    chat: WechatyTelegramBot.tgChatRoom(room),
+                    chat: this._tgChatRoom(room),
                     new_chat_member: members[0],
                     new_chat_members: members,
                 },
@@ -212,24 +223,24 @@ class WechatyTelegramBot extends EventEmitter {
         }).on('room-leave', (room, leavers) => {
             leavers.forEach((leaver) => {
                 this.processUpdate({
-                    update_id: WechatyTelegramBot.uniqueId,
+                    update_id: this._uniqueId('update'),
                     message: {
-                        message_id: WechatyTelegramBot.uniqueId,
-                        from: WechatyTelegramBot.tgUser(leaver), // notice: can not detect admin kicking
+                        message_id: this._uniqueId('sysmessage'),
+                        from: this._tgUser(leaver), // notice: can not detect admin kicking
                         date: Date.now(),
-                        chat: WechatyTelegramBot.tgChatRoom(room),
-                        left_chat_member: WechatyTelegramBot.tgUser(leaver),
+                        chat: this._tgChatRoom(room),
+                        left_chat_member: this._tgUser(leaver),
                     },
                 });
             });
         }).on('room-topic', (room, newTitle, oldTitle, changer) => {
             this.processUpdate({
-                update_id: WechatyTelegramBot.uniqueId,
+                update_id: this._uniqueId('update'),
                 message: {
-                    message_id: WechatyTelegramBot.uniqueId,
-                    from: WechatyTelegramBot.tgUser(changer),
+                    message_id: this._uniqueId('sysmessage'),
+                    from: this._tgUser(changer),
                     date: Date.now(),
-                    chat: WechatyTelegramBot.tgChatRoom(room),
+                    chat: this._tgChatRoom(room),
                     new_chat_title: newTitle,
                 },
             });
@@ -237,6 +248,8 @@ class WechatyTelegramBot extends EventEmitter {
 
         this._textRegexpCallbacks = [];
         this._replyListeners = [];
+
+        this._uniqueIdBuffer = {};
 
         if (options.polling) {
             const autoStart = options.polling.autoStart;
@@ -342,7 +355,7 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     onReplyToMessage(chatId, messageId, callback) {
-        const id = WechatyTelegramBot.uniqueId;
+        const id = this._uniqueId('callback');
 
         this._replyListenerId += 1;
 
@@ -443,7 +456,7 @@ class WechatyTelegramBot extends EventEmitter {
 
     getMe() {
         return new Promise((resolve, reject) => {
-            return WechatyTelegramBot.tgUser(this.wechaty.self());
+            return this._tgUser(this.wechaty.self());
         });
     }
 
