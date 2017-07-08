@@ -174,6 +174,7 @@ class WechatyTelegramBot extends EventEmitter {
                             ? WechatyTelegramBot.tgChatRoom(message.room())
                             : WechatyTelegramBot.tgChatUser(message.from()),
                         text: message.content(),
+                        // TODO: other content types
                         entities: entities,
                     },
                 });
@@ -429,8 +430,8 @@ class WechatyTelegramBot extends EventEmitter {
     // ======== methods: basic ========
 
     getMe() {
-        return this.wechaty.self().then((user) => {
-            return WechatyTelegramBot.tgUser(user);
+        return new Promise((resolve, reject) => {
+            return WechatyTelegramBot.tgUser(this.wechaty.self());
         });
     }
 
