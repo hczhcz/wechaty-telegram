@@ -203,7 +203,9 @@ class WechatyTelegramBot extends EventEmitter {
         // this.options.wechaty.autoFriend
         // TODO: allow slient fail if wechat does not support the method
 
-        this.wechaty = new wechaty.Wechaty(this.options.wechaty);
+        // notice: wechaty supports singleton only
+        // this.wechaty = new wechaty.Wechaty(this.options.wechaty);
+        this.wechaty = wechaty.Wechaty.instance(this.options.wechaty);
 
         // other events: 'heartbeat', 'login', 'logout', 'scan'
         this.wechaty.on('error', (err) => {
