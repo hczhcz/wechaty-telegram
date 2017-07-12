@@ -63,38 +63,38 @@ class WechatyTelegramBot extends EventEmitter {
         return buffer.last;
     }
 
-    _tgUser(user) {
+    _tgUserContact(contact) {
         let id;
 
-        if (user.alias().match(/^#\d+/)) {
-            id = parseInt(user.alias().slice(1), 10);
+        if (contact.alias().match(/^#\d+/)) {
+            id = parseInt(contact.alias().slice(1), 10);
         } else {
-            id = this._uniqueId('user', user);
-            user.alias('#' + id);
+            id = this._uniqueId('contact', contact);
+            contact.alias('#' + id);
         }
 
         return {
             id: id,
-            first_name: user.name(),
-            // username: user.weixin(),
+            first_name: contact.name(),
+            // username: contact.weixin(),
         };
     }
 
-    _tgChatUser(user) {
+    _tgChatContact(contact) {
         let id;
 
-        if (user.alias().match(/^#\d+/)) {
-            id = parseInt(user.alias().slice(1), 10);
+        if (contact.alias().match(/^#\d+/)) {
+            id = parseInt(contact.alias().slice(1), 10);
         } else {
-            id = this._uniqueId('user', user);
-            user.alias('#' + id);
+            id = this._uniqueId('contact', contact);
+            contact.alias('#' + id);
         }
 
         return {
             id: id,
             type: 'private',
-            first_name: user.name(),
-            // username: user.weixin(),
+            first_name: contact.name(),
+            // username: contact.weixin(),
         };
     }
 
@@ -116,9 +116,9 @@ class WechatyTelegramBot extends EventEmitter {
         };
     }
 
-    _wxUser(userId) {
-        if (this._buffers.user[userId]) {
-            return Promise.resolve(this._buffers.user[userId]);
+    _wxContact(userId) {
+        if (this._buffers.contact[userId]) {
+            return Promise.resolve(this._buffers.contact[userId]);
         } else {
             return wechaty.Contact.find({
                 alias: '#' + userId,
@@ -169,9 +169,9 @@ class WechatyTelegramBot extends EventEmitter {
                 update_id: this._uniqueId('update'),
                 message: {
                     message_id: this._uniqueId('sysmessage'),
-                    from: this._tgUser(contact),
+                    from: this._tgUserContact(contact),
                     date: Date.now(),
-                    chat: this._tgChatUser(contact),
+                    chat: this._tgChatContact(contact),
                     text: '/start',
                     entities: [{
                         type: 'bot_command',
@@ -188,10 +188,10 @@ class WechatyTelegramBot extends EventEmitter {
                 //         the bot should parse the text by itself
                 message.mentioned().forEach((contact) => {
                     entities.push({
-                        type: 'mention',
+                        type: 'text_mention',
                         offset: 0, // TODO
                         length: 0, // TODO
-                        user: this._tgUser(contact),
+                        user: this._tgUserContact(contact),
                     });
                 });
 
@@ -199,11 +199,11 @@ class WechatyTelegramBot extends EventEmitter {
                     update_id: this._uniqueId('update'),
                     message: {
                         message_id: this._uniqueId('message', message),
-                        from: this._tgUser(message.from()),
+                        from: this._tgUserContact(message.from()),
                         date: Date.now(),
                         chat: message.room()
                             ? this._tgChatRoom(message.room())
-                            : this._tgChatUser(message.from()),
+                            : this._tgChatContact(message.from()),
                         text: message.content(),
                         // TODO: other content types
                         entities: entities,
@@ -214,14 +214,14 @@ class WechatyTelegramBot extends EventEmitter {
             const members = [];
 
             invitees.forEach((invitee) => {
-                members.push(this._tgUser(invitee));
+                members.push(this._tgUserContact(invitee));
             });
 
             this.processUpdate({
                 update_id: this._uniqueId('update'),
                 message: {
                     message_id: this._uniqueId('sysmessage'),
-                    from: this._tgUser(inviter),
+                    from: this._tgUserContact(inviter),
                     date: Date.now(),
                     chat: this._tgChatRoom(room),
                     new_chat_member: members[0],
@@ -234,10 +234,10 @@ class WechatyTelegramBot extends EventEmitter {
                     update_id: this._uniqueId('update'),
                     message: {
                         message_id: this._uniqueId('sysmessage'),
-                        from: this._tgUser(leaver), // notice: can not detect admin kicking
+                        from: this._tgUserContact(leaver), // notice: can not detect admin kicking
                         date: Date.now(),
                         chat: this._tgChatRoom(room),
-                        left_chat_member: this._tgUser(leaver),
+                        left_chat_member: this._tgUserContact(leaver),
                     },
                 });
             });
@@ -246,7 +246,7 @@ class WechatyTelegramBot extends EventEmitter {
                 update_id: this._uniqueId('update'),
                 message: {
                     message_id: this._uniqueId('sysmessage'),
-                    from: this._tgUser(changer),
+                    from: this._tgUserContact(changer),
                     date: Date.now(),
                     chat: this._tgChatRoom(room),
                     new_chat_title: newTitle,
@@ -258,7 +258,7 @@ class WechatyTelegramBot extends EventEmitter {
         this._replyListeners = [];
 
         this._buffers = {
-            user: {
+            contact: {
                 last: Date.now() - 1,
                 bufsize: 65536,
             },
@@ -477,7 +477,7 @@ class WechatyTelegramBot extends EventEmitter {
     // ======== methods: basic ========
 
     getMe() {
-        return Promise.resolve(this._tgUser(this.wechaty.self()));
+        return Promise.resolve(this._tgUserContact(this.wechaty.self()));
     }
 
     sendMessage(chatId, text, form = {}) {
@@ -491,8 +491,8 @@ class WechatyTelegramBot extends EventEmitter {
                 };
             });
         } else {
-            return this._wxUser(chatId).then((user) => {
-                user.say(text);
+            return this._wxContact(chatId).then((contact) => {
+                contact.say(text);
 
                 return {
                     // TODO: Message object
