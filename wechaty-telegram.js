@@ -590,163 +590,65 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     sendPhoto(chatId, photo, options = {}) {
-        const opts = {
-            qs: options,
-        };
-        opts.qs.chat_id = chatId;
-        try {
-            const sendData = this._formatSendData('photo', photo);
-            opts.formData = sendData[0];
-            opts.qs.photo = sendData[1];
-        } catch (ex) {
-            return Promise.reject(ex);
-        }
-        return this._request('sendPhoto', opts);
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     sendAudio(chatId, audio, options = {}) {
-        const opts = {
-            qs: options
-        };
-        opts.qs.chat_id = chatId;
-        try {
-            const sendData = this._formatSendData('audio', audio);
-            opts.formData = sendData[0];
-            opts.qs.audio = sendData[1];
-        } catch (ex) {
-            return Promise.reject(ex);
-        }
-        return this._request('sendAudio', opts);
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     sendDocument(chatId, doc, options = {}, fileOpts = {}) {
-        const opts = {
-            qs: options
-        };
-        opts.qs.chat_id = chatId;
-        try {
-            const sendData = this._formatSendData('document', doc);
-            opts.formData = sendData[0];
-            opts.qs.document = sendData[1];
-        } catch (ex) {
-            return Promise.reject(ex);
-        }
-        if (opts.formData && Object.keys(fileOpts).length) {
-            opts.formData.document.options = fileOpts;
-        }
-        return this._request('sendDocument', opts);
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     sendSticker(chatId, sticker, options = {}) {
-        const opts = {
-            qs: options
-        };
-        opts.qs.chat_id = chatId;
-        try {
-            const sendData = this._formatSendData('sticker', sticker);
-            opts.formData = sendData[0];
-            opts.qs.sticker = sendData[1];
-        } catch (ex) {
-            return Promise.reject(ex);
-        }
-        return this._request('sendSticker', opts);
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     sendVideo(chatId, video, options = {}) {
-        const opts = {
-            qs: options
-        };
-        opts.qs.chat_id = chatId;
-        try {
-            const sendData = this._formatSendData('video', video);
-            opts.formData = sendData[0];
-            opts.qs.video = sendData[1];
-        } catch (ex) {
-            return Promise.reject(ex);
-        }
-        return this._request('sendVideo', opts);
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     sendVoice(chatId, voice, options = {}) {
-        const opts = {
-            qs: options
-        };
-        opts.qs.chat_id = chatId;
-        try {
-            const sendData = this._formatSendData('voice', voice);
-            opts.formData = sendData[0];
-            opts.qs.voice = sendData[1];
-        } catch (ex) {
-            return Promise.reject(ex);
-        }
-        return this._request('sendVoice', opts);
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     sendVideoNote(chatId, videoNote, options = {}) {
-        const opts = {
-            qs: options
-        };
-        opts.qs.chat_id = chatId;
-        try {
-            const sendData = this._formatSendData('video_note', videoNote);
-            opts.formData = sendData[0];
-            opts.qs.video_note = sendData[1];
-        } catch (ex) {
-            return Promise.reject(ex);
-        }
-        return this._request('sendVideoNote', opts);
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     sendLocation(chatId, latitude, longitude, form = {}) {
-        form.chat_id = chatId;
-        form.latitude = latitude;
-        form.longitude = longitude;
-        return this._request('sendLocation', { form });
+        return Promise.reject(new Error('not supported in wechat')); // TODO: ?
     }
 
     sendVenue(chatId, latitude, longitude, title, address, form = {}) {
-        form.chat_id = chatId;
-        form.latitude = latitude;
-        form.longitude = longitude;
-        form.title = title;
-        form.address = address;
-        return this._request('sendVenue', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     sendContact(chatId, phoneNumber, firstName, form = {}) {
-        form.chat_id = chatId;
-        form.phone_number = phoneNumber;
-        form.first_name = firstName;
-        return this._request('sendContact', { form });
+        return Promise.reject(new Error('not supported in wechat')); // TODO: ?
     }
 
     sendChatAction(chatId, action) {
-        const form = {
-            action,
-            chat_id: chatId
-        };
-        return this._request('sendChatAction', { form });
+        return Promise.reject(new Error('not supported in wechat')); // TODO: ?
     }
 
     getUserProfilePhotos(userId, form = {}) {
-        form.user_id = userId;
-        return this._request('getUserProfilePhotos', { form });
+        return Promise.reject(new Error('not supported in wechat')); // TODO: ?
     }
 
     getFile(fileId) {
+        // TODO: provide a mock solution?
         return Promise.reject(new Error('not supported in wechat'));
     }
 
     kickChatMember(chatId, userId) {
-        const form = {
-            chat_id: chatId,
-            user_id: userId
-        };
-        return this._request('kickChatMember', { form });
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     unbanChatMember(chatId, userId) {
         // TODO: implement as inviting chat member
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     restrictChatMember(chatId, userId, form = {}) {
@@ -770,9 +672,7 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     setChatTitle(chatId, title, form = {}) {
-        form.chat_id = chatId;
-        form.title = title;
-        return this._request('setChatTitle', { form })
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     setChatDescription(chatId, description, form = {}) {
@@ -784,44 +684,27 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     unpinChatMessage(chatId, form = {}) {
-        form.chat_id = chatId;
-        return this._request('unpinChatMessage', { form });
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     leaveChat(chatId) {
-        const form = {
-            chat_id: chatId
-        };
-        return this._request('leaveChat', { form });
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     getChat(chatId) {
-        const form = {
-            chat_id: chatId
-        };
-        return this._request('getChat', { form });
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     getChatAdministrators(chatId) {
-        const form = {
-            chat_id: chatId
-        };
-        return this._request('getChatAdministrators', { form });
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     getChatMembersCount(chatId) {
-        const form = {
-            chat_id: chatId
-        };
-        return this._request('getChatMembersCount', { form });
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     getChatMember(chatId, userId) {
-        const form = {
-            chat_id: chatId,
-            user_id: userId
-        };
-        return this._request('getChatMember', { form });
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     answerCallbackQuery(callbackQueryId, text, showAlert, form = {}) {
@@ -886,27 +769,18 @@ class WechatyTelegramBot extends EventEmitter {
     // ======== file downloading ========
 
     getFileLink(fileId) {
-        return this.getFile(fileId)
-            .then((resp) => {
-                return this.options.baseApiUrl + '/file/bot' + this.token + '/' + resp.file_path;
-            });
+        // TODO
+        return this.getFile(fileId).then((file) => {
+            return null;
+            // return this.options.baseApiUrl + '/file/bot' + this.token + '/' + resp.file_path;
+        });
     }
 
     downloadFile(fileId, downloadDir) {
-        return this
-            .getFileLink(fileId)
-            .then((fileURI) => {
-                const fileName = fileURI.slice(fileURI.lastIndexOf('/') + 1);
-                // TODO: ensure fileName doesn't contains slashes
-                const filePath = path.join(downloadDir, fileName);
-
-                // notice: properly handles errors and closes all streams
-                return Promise
-                    .fromCallback((next) => {
-                        pump(streamedRequest({ uri: fileURI }), fs.createWriteStream(filePath), next);
-                    })
-                    .return(filePath);
-            });
+        // TODO
+        return this.getFile(fileId).then((file) => {
+            return null; // TODO: return the downloaded file path
+        });
     }
 }
 
