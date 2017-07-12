@@ -142,12 +142,14 @@ class WechatyTelegramBot extends EventEmitter {
             });
         });
 
+        message.mockDate = Date.now();
+
         return {
             update_id: this._uniqueId('update'),
             message: {
                 message_id: this._uniqueId('message', message),
                 from: this._tgUserContact(message.from()),
-                date: Date.now(),
+                date: message.mockDate,
                 chat: message.room()
                     ? this._tgChatRoom(message.room())
                     : this._tgChatContact(message.from()),
@@ -517,7 +519,7 @@ class WechatyTelegramBot extends EventEmitter {
                 return contact.say(text, reply).then((succeed) => {
                     if (succeed) {
                         const message = {
-                            message_id: this._uniqueId('message', message),
+                            message_id: this._uniqueId('message'),
                             from: this._tgUserContact(this.wechaty.self()),
                             date: Date.now(),
                             chat: this._tgChatContact(contact),
@@ -544,7 +546,7 @@ class WechatyTelegramBot extends EventEmitter {
                 return room.say(text, reply).then((succeed) => {
                     if (succeed) {
                         const message = {
-                            message_id: this._uniqueId('message', message),
+                            message_id: this._uniqueId('message'),
                             from: this._tgUserContact(this.wechaty.self()),
                             date: Date.now(),
                             chat: this._tgChatRoom(room),
@@ -567,10 +569,24 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     forwardMessage(chatId, fromChatId, messageId, form = {}) {
-        form.chat_id = chatId;
-        form.from_chat_id = fromChatId;
-        form.message_id = messageId;
-        return this._request('forwardMessage', { form });
+        const forwardMessage = this._buffers.message[messageId];
+
+        if (forwardMessage) {
+            return sendMessage(chatId, forwardMessage.content(), {
+                reply_to_message_id: messageId,
+            }).then((message) => {
+                message.forward_from = this._tgUserContact(message.from());
+                message.forward_from_chat = message.room()
+                    ? this._tgChatRoom(message.room())
+                    : this._tgChatContact(message.from());
+                message.forward_from_message_id = messageId;
+                message.forward_date = message.mockDate;
+
+                return message;
+            });
+        } else {
+            return new Error('message not found');
+        }
     }
 
     sendPhoto(chatId, photo, options = {}) {
