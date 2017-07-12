@@ -116,12 +116,48 @@ class WechatyTelegramBot extends EventEmitter {
         };
     }
 
+    _tgMessage(message) {
+        const entities = [];
+
+        // notice: the other entities are not supported
+        //         the bot should parse the text by itself
+        message.mentioned().forEach((contact) => {
+            entities.push({
+                type: 'text_mention',
+                offset: 0, // TODO
+                length: 0, // TODO
+                user: this._tgUserContact(contact),
+            });
+        });
+
+        return {
+            update_id: this._uniqueId('update'),
+            message: {
+                message_id: this._uniqueId('message', message),
+                from: this._tgUserContact(message.from()),
+                date: Date.now(),
+                chat: message.room()
+                    ? this._tgChatRoom(message.room())
+                    : this._tgChatContact(message.from()),
+                text: message.content(),
+                // TODO: other content types
+                entities: entities,
+            },
+        };
+    }
+
     _wxContact(userId) {
         if (this._buffers.contact[userId]) {
             return Promise.resolve(this._buffers.contact[userId]);
         } else {
             return wechaty.Contact.find({
                 alias: '#' + userId,
+            }).then((contact) => {
+                if (contact) {
+                    return contact;
+                } else {
+                    return new Error('contact not found');
+                }
             });
         }
         //
@@ -135,6 +171,12 @@ class WechatyTelegramBot extends EventEmitter {
                 return rooms.find((room) => {
                     return room.alias(this.wechaty.self()) === '#' + -chatId;
                 });
+            }).then((room) => {
+                if (room) {
+                    return room;
+                } else {
+                    return new Error('room not found');
+                }
             });
         }
     }
@@ -182,33 +224,7 @@ class WechatyTelegramBot extends EventEmitter {
             });
         }).on('message', (message) => {
             if (!message.self()) {
-                const entities = [];
-
-                // notice: the other entities are not supported
-                //         the bot should parse the text by itself
-                message.mentioned().forEach((contact) => {
-                    entities.push({
-                        type: 'text_mention',
-                        offset: 0, // TODO
-                        length: 0, // TODO
-                        user: this._tgUserContact(contact),
-                    });
-                });
-
-                this.processUpdate({
-                    update_id: this._uniqueId('update'),
-                    message: {
-                        message_id: this._uniqueId('message', message),
-                        from: this._tgUserContact(message.from()),
-                        date: Date.now(),
-                        chat: message.room()
-                            ? this._tgChatRoom(message.room())
-                            : this._tgChatContact(message.from()),
-                        text: message.content(),
-                        // TODO: other content types
-                        entities: entities,
-                    },
-                });
+                this.processUpdate(this._tgMessage(message));
             }
         }).on('room-join', (room, invitees, inviter) => {
             const members = [];
@@ -481,22 +497,68 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     sendMessage(chatId, text, form = {}) {
-        // TODO
-        if (id < 0) {
-            return this._wxRoom(chatId).then((room) => {
-                room.say(text);
+        // notice: parse_mode is not supported
+        // TODO: reply_markup
 
-                return {
-                    // TODO: Message object
-                };
+        if (id >= 0) {
+            return this._wxContact(chatId).then((contact) => {
+                const reply = this._buffers.message[form.reply_to_message_id]
+                    ? this._buffers.message[form.reply_to_message_id].from()
+                    : null;
+
+                return contact.say(text, reply).then((succeed) => {
+                    if (succeed) {
+                        const message = {
+                            message_id: this._uniqueId('message', message),
+                            from: this._tgUserContact(this.wechaty.self()),
+                            date: Date.now(),
+                            chat: this._tgChatContact(contact),
+                            text: text,
+                            // TODO: other content types
+                            entities: [],
+                        };
+
+                        if (this._buffers.message[form.reply_to_message_id]) {
+                            message.reply_to_message = this._tgMessage(
+                                this._buffers.message[form.reply_to_message_id]
+                            );
+                        }
+
+                        return message;
+                    } else {
+                        return new Error('failed to send message');
+                    }
+                });
             });
         } else {
-            return this._wxContact(chatId).then((contact) => {
-                contact.say(text);
+            return this._wxRoom(chatId).then((room) => {
+                const reply = this._buffers.message[form.reply_to_message_id]
+                    ? this._buffers.message[form.reply_to_message_id].from()
+                    : null;
 
-                return {
-                    // TODO: Message object
-                };
+                return room.say(text, reply).then((succeed) => {
+                    if (succeed) {
+                        const message = {
+                            message_id: this._uniqueId('message', message),
+                            from: this._tgUserContact(this.wechaty.self()),
+                            date: Date.now(),
+                            chat: this._tgChatRoom(room),
+                            text: text,
+                            // TODO: other content types
+                            entities: [],
+                        };
+
+                        if (this._buffers.message[form.reply_to_message_id]) {
+                            message.reply_to_message = this._tgMessage(
+                                this._buffers.message[form.reply_to_message_id]
+                            );
+                        }
+
+                        return message;
+                    } else {
+                        return new Error('failed to send message');
+                    }
+                });
             });
         }
     }
