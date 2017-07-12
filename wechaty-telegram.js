@@ -104,8 +104,20 @@ class WechatyTelegramBot extends EventEmitter {
         if (room.alias(this.wechaty.self()).match(/^#\d+/)) {
             id = parseInt(room.alias(this.wechaty.self()).slice(1), 10);
         } else {
-            id = this._uniqueId('room', room);
-            // notice: not able to identify a chatroom automatically
+            // notice: may affect the performance
+            for (const i in this._buffers.room) {
+                if (this._buffers.room[i].id === room.id) {
+                    id = i;
+                    this._buffers.room[i] = room; // update
+
+                    break;
+                }
+            }
+
+            if (!id) {
+                id = this._uniqueId('room', room);
+                // notice: not able to set a chatroom id automatically
+            }
         }
 
         return {
@@ -147,38 +159,35 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     _wxContact(userId) {
-        if (this._buffers.contact[userId]) {
-            return Promise.resolve(this._buffers.contact[userId]);
-        } else {
-            return wechaty.Contact.find({
-                alias: '#' + userId,
-            }).then((contact) => {
-                if (contact) {
-                    return contact;
-                } else {
-                    return new Error('contact not found');
-                }
-            });
-        }
-        //
+        return wechaty.Contact.find({
+            alias: '#' + userId,
+        }).then((contact) => {
+            if (contact) {
+                return contact;
+            } else if (this._buffers.contact[userId]) {
+                // data in the buffer may be out of date
+                return Promise.resolve(this._buffers.contact[userId]);
+            } else {
+                return new Error('contact not found');
+            }
+        });
     }
 
     _wxRoom(chatId) {
-        if (this._buffers.room[-chatId]) {
-            return Promise.resolve(this._buffers.room[-chatId]);
-        } else {
-            return wechaty.Room.findAll().then((rooms) => {
-                return rooms.find((room) => {
-                    return room.alias(this.wechaty.self()) === '#' + -chatId;
-                });
-            }).then((room) => {
-                if (room) {
-                    return room;
-                } else {
-                    return new Error('room not found');
-                }
+        return wechaty.Room.findAll().then((rooms) => {
+            return rooms.find((room) => {
+                return room.alias(this.wechaty.self()) === '#' + -chatId;
             });
-        }
+        }).then((room) => {
+            if (room) {
+                return room;
+            } else if (this._buffers.room[-chatId]) {
+                // data in the buffer may be out of date
+                return Promise.resolve(this._buffers.room[-chatId]);
+            } else {
+                return new Error('room not found');
+            }
+        });
     }
 
     // ======== initialization ========
