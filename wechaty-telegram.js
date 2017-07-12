@@ -201,6 +201,7 @@ class WechatyTelegramBot extends EventEmitter {
         this.options.wechaty = this.options.wechaty || {};
         this.options.wechaty.profile = profile || this.options.wechaty.profile;
         // this.options.wechaty.autoFriend
+        // TODO: allow slient fail if wechat does not support the method
 
         this.wechaty = new wechaty.Wechaty(this.options.wechaty);
 
