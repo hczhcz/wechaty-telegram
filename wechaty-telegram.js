@@ -66,7 +66,7 @@ class WechatyTelegramBot extends EventEmitter {
     _tgUserContact(contact) {
         let id;
 
-        if (contact.alias().match(/^#\d+/)) {
+        if (String(contact.alias()).match(/^#\d+/)) {
             id = parseInt(contact.alias().slice(1), 10);
         } else {
             id = this._uniqueId('contact', contact);
@@ -83,7 +83,7 @@ class WechatyTelegramBot extends EventEmitter {
     _tgChatContact(contact) {
         let id;
 
-        if (contact.alias().match(/^#\d+/)) {
+        if (String(contact.alias()).match(/^#\d+/)) {
             id = parseInt(contact.alias().slice(1), 10);
         } else {
             id = this._uniqueId('contact', contact);
@@ -101,7 +101,7 @@ class WechatyTelegramBot extends EventEmitter {
     _tgChatRoom(room) {
         let id;
 
-        if (room.alias(this.wechaty.self()).match(/^#\d+/)) {
+        if (String(room.alias(this.wechaty.self())).match(/^#\d+/)) {
             id = parseInt(room.alias(this.wechaty.self()).slice(1), 10);
         } else {
             // notice: may affect the performance
@@ -512,7 +512,7 @@ class WechatyTelegramBot extends EventEmitter {
         // notice: parse_mode is not supported
         // TODO: reply_markup
 
-        if (id >= 0) {
+        if (chatId >= 0) {
             return this._wxContact(chatId).then((contact) => {
                 const replyMessage = this._buffers.message[form.reply_to_message_id];
                 const reply = replyMessage ? replyMessage.from() : null;
@@ -573,7 +573,7 @@ class WechatyTelegramBot extends EventEmitter {
         const forwardMessage = this._buffers.message[messageId];
 
         if (forwardMessage) {
-            return sendMessage(chatId, forwardMessage.content(), {
+            return this.sendMessage(chatId, forwardMessage.content(), {
                 reply_to_message_id: messageId,
             }).then((message) => {
                 message.forward_from = this._tgUserContact(message.from());
