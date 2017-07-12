@@ -132,7 +132,7 @@ class WechatyTelegramBot extends EventEmitter {
             return Promise.resolve(this._buffers.room[-chatId]);
         } else {
             return wechaty.Room.findAll().then((rooms) => {
-                rooms.find((room) => {
+                return rooms.find((room) => {
                     return room.alias(this.wechaty.self()) === '#' + -chatId;
                 });
             });
@@ -481,9 +481,24 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     sendMessage(chatId, text, form = {}) {
-        form.chat_id = chatId;
-        form.text = text;
-        return this._request('sendMessage', { form });
+        // TODO
+        if (id < 0) {
+            return this._wxRoom(chatId).then((room) => {
+                room.say(text);
+
+                return {
+                    // TODO: Message object
+                };
+            });
+        } else {
+            return this._wxUser(chatId).then((user) => {
+                user.say(text);
+
+                return {
+                    // TODO: Message object
+                };
+            });
+        }
     }
 
     forwardMessage(chatId, fromChatId, messageId, form = {}) {
