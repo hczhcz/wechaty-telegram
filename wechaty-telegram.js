@@ -511,9 +511,8 @@ class WechatyTelegramBot extends EventEmitter {
 
         if (id >= 0) {
             return this._wxContact(chatId).then((contact) => {
-                const reply = this._buffers.message[form.reply_to_message_id]
-                    ? this._buffers.message[form.reply_to_message_id].from()
-                    : null;
+                const replyMessage = this._buffers.message[form.reply_to_message_id];
+                const reply = replyMessage ? replyMessage.from() : null;
 
                 return contact.say(text, reply).then((succeed) => {
                     if (succeed) {
@@ -527,10 +526,8 @@ class WechatyTelegramBot extends EventEmitter {
                             entities: [],
                         };
 
-                        if (this._buffers.message[form.reply_to_message_id]) {
-                            message.reply_to_message = this._tgMessage(
-                                this._buffers.message[form.reply_to_message_id]
-                            );
+                        if (replyMessage) {
+                            message.reply_to_message = this._tgMessage(replyMessage);
                         }
 
                         return message;
@@ -541,9 +538,8 @@ class WechatyTelegramBot extends EventEmitter {
             });
         } else {
             return this._wxRoom(chatId).then((room) => {
-                const reply = this._buffers.message[form.reply_to_message_id]
-                    ? this._buffers.message[form.reply_to_message_id].from()
-                    : null;
+                const replyMessage = this._buffers.message[form.reply_to_message_id];
+                const reply = replyMessage ? replyMessage.from() : null;
 
                 return room.say(text, reply).then((succeed) => {
                     if (succeed) {
@@ -557,10 +553,8 @@ class WechatyTelegramBot extends EventEmitter {
                             entities: [],
                         };
 
-                        if (this._buffers.message[form.reply_to_message_id]) {
-                            message.reply_to_message = this._tgMessage(
-                                this._buffers.message[form.reply_to_message_id]
-                            );
+                        if (replyMessage) {
+                            message.reply_to_message = this._tgMessage(replyMessage);
                         }
 
                         return message;
