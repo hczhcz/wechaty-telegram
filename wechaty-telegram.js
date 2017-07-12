@@ -118,9 +118,7 @@ class WechatyTelegramBot extends EventEmitter {
 
     _wxUser(userId) {
         if (this._buffers.user[userId]) {
-            return new Promise((resolve, reject) => {
-                resolve(this._buffers.user[userId]);
-            });
+            return Promise.resolve(this._buffers.user[userId]);
         } else {
             return wechaty.Contact.find({
                 alias: '#' + userId,
@@ -131,9 +129,7 @@ class WechatyTelegramBot extends EventEmitter {
 
     _wxRoom(chatId) {
         if (this._buffers.room[-chatId]) {
-            return new Promise((resolve, reject) => {
-                resolve(this._buffers.room[-chatId]);
-            });
+            return Promise.resolve(this._buffers.room[-chatId]);
         } else {
             return wechaty.Room.findAll().then((rooms) => {
                 rooms.find((room) => {
@@ -326,9 +322,7 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     getUpdates(form = {}) {
-        return new Promise((resolve, reject) => {
-            resolve([]);
-        });
+        return Promise.resolve([]);
     }
 
     // ======== web hook ========
@@ -346,24 +340,18 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     setWebHook(url, options = {}) {
-        return new Promise((resolve, reject) => {
-            resolve(true);
-        });
+        return Promise.resolve(true);
     }
 
     deleteWebHook() {
-        return new Promise((resolve, reject) => {
-            resolve(true);
-        });
+        return Promise.resolve(true);
     }
 
     getWebHookInfo() {
-        return new Promise((resolve, reject) => {
-            resolve({
-                url: '',
-                has_custom_certificate: false,
-                pending_update_count: 0,
-            });
+        return Promise.resolve({
+            url: '',
+            has_custom_certificate: false,
+            pending_update_count: 0,
         });
     }
 
@@ -489,9 +477,7 @@ class WechatyTelegramBot extends EventEmitter {
     // ======== methods: basic ========
 
     getMe() {
-        return new Promise((resolve, reject) => {
-            return this._tgUser(this.wechaty.self());
-        });
+        return Promise.resolve(this._tgUser(this.wechaty.self()));
     }
 
     sendMessage(chatId, text, form = {}) {
