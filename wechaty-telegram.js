@@ -165,7 +165,7 @@ class WechatyTelegramBot extends EventEmitter {
                 return contact;
             } else if (this._buffers.contact[userId]) {
                 // data in the buffer may be out of date
-                return Promise.resolve(this._buffers.contact[userId]);
+                return this._buffers.contact[userId];
             } else {
                 return new Error('contact not found');
             }
@@ -182,7 +182,7 @@ class WechatyTelegramBot extends EventEmitter {
                 return room;
             } else if (this._buffers.room[-chatId]) {
                 // data in the buffer may be out of date
-                return Promise.resolve(this._buffers.room[-chatId]);
+                return this._buffers.room[-chatId];
             } else {
                 return new Error('room not found');
             }
@@ -195,9 +195,19 @@ class WechatyTelegramBot extends EventEmitter {
         super();
 
         this.options = options;
+        if (options.polling && typeof options.polling.autoStart === 'undefined') {
+            options.polling.autoStart = true;
+        }
+        if (options.webHook && typeof options.webHook.autoOpen === 'undefined') {
+            options.webHook.autoOpen = true;
+        }
         this.options.wechaty = this.options.wechaty || {};
-        this.options.wechaty.profile = profile || this.options.wechaty.profile;
-        // this.options.wechaty.autoFriend
+        if (typeof this.options.wechaty.profile === 'undefined') {
+            this.options.wechaty.profile = profile;
+        }
+        if (typeof this.options.wechaty.autoFriend === 'undefined') {
+            this.options.wechaty.autoFriend = true;
+        }
         // TODO: allow slient fail if wechat does not support the method
 
         // notice: wechaty supports singleton only
@@ -311,18 +321,12 @@ class WechatyTelegramBot extends EventEmitter {
             },
         };
 
-        if (options.polling) {
-            const autoStart = options.polling.autoStart;
+        if (options.polling && options.polling.autoStart) {
+            this.startPolling();
+        }
 
-            if (typeof autoStart === 'undefined' || autoStart === true) {
-                this.startPolling();
-            }
-        } else if (options.webHook) {
-            const autoOpen = options.webHook.autoOpen;
-
-            if (typeof autoOpen === 'undefined' || autoOpen === true) {
-                this.openWebHook();
-            }
+        if (options.webHook && options.webHook.autoOpen) {
+            this.openWebHook();
         }
     }
 
