@@ -64,7 +64,7 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     _tgUserContact(contact) {
-        let id;
+        let id = null;
 
         if (String(contact.alias()).match(/^#\d+/)) {
             id = parseInt(contact.alias().slice(1), 10);
@@ -81,7 +81,7 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     _tgChatContact(contact) {
-        let id;
+        let id = null;
 
         if (String(contact.alias()).match(/^#\d+/)) {
             id = parseInt(contact.alias().slice(1), 10);
@@ -99,7 +99,7 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     _tgChatRoom(room) {
-        let id;
+        let id = null;
 
         if (String(room.alias(this.wechaty.self())).match(/^#\d+/)) {
             id = parseInt(room.alias(this.wechaty.self()).slice(1), 10);
@@ -142,22 +142,19 @@ class WechatyTelegramBot extends EventEmitter {
             });
         });
 
-        message.mockDate = Date.now();
-
-        return {
-            update_id: this._uniqueId('update'),
-            message: {
-                message_id: this._uniqueId('message', message),
-                from: this._tgUserContact(message.from()),
-                date: message.mockDate,
-                chat: message.room()
-                    ? this._tgChatRoom(message.room())
-                    : this._tgChatContact(message.from()),
-                text: message.content(),
-                // TODO: other content types
-                entities: entities,
-            },
+        message.tgMessage = {
+            message_id: this._uniqueId('message', message),
+            from: this._tgUserContact(message.from()),
+            date: Date.now(),
+            chat: message.room()
+                ? this._tgChatRoom(message.room())
+                : this._tgChatContact(message.from()),
+            text: message.content(),
+            // TODO: other content types
+            entities: entities,
         };
+
+        return message.tgMessage;
     }
 
     _wxContact(userId) {
@@ -238,7 +235,10 @@ class WechatyTelegramBot extends EventEmitter {
             });
         }).on('message', (message) => {
             if (!message.self()) {
-                this.processUpdate(this._tgMessage(message));
+                this.processUpdate({
+                    update_id: this._uniqueId('update'),
+                    message: this._tgMessage(message),
+                });
             }
         }).on('room-join', (room, invitees, inviter) => {
             const members = [];
@@ -532,7 +532,7 @@ class WechatyTelegramBot extends EventEmitter {
                         };
 
                         if (replyMessage) {
-                            message.reply_to_message = this._tgMessage(replyMessage);
+                            message.reply_to_message = replyMessage.tgMessage;
                         }
 
                         return message;
@@ -559,7 +559,7 @@ class WechatyTelegramBot extends EventEmitter {
                         };
 
                         if (replyMessage) {
-                            message.reply_to_message = this._tgMessage(replyMessage);
+                            message.reply_to_message = replyMessage.tgMessage;
                         }
 
                         return message;
@@ -578,12 +578,10 @@ class WechatyTelegramBot extends EventEmitter {
             return this.sendMessage(chatId, forwardMessage.content(), {
                 reply_to_message_id: messageId,
             }).then((message) => {
-                message.forward_from = this._tgUserContact(message.from());
-                message.forward_from_chat = message.room()
-                    ? this._tgChatRoom(message.room())
-                    : this._tgChatContact(message.from());
-                message.forward_from_message_id = messageId;
-                message.forward_date = message.mockDate;
+                message.forward_from = forwardMessage.tgMessage.from;
+                message.forward_from_chat = forwardMessage.tgMessage.chat;
+                message.forward_from_message_id = forwardMessage.tgMessage.message_id;
+                message.forward_date = forwardMessage.tgMessage.date;
 
                 return message;
             });
