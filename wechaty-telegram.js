@@ -710,7 +710,7 @@ class WechatyTelegramBot extends EventEmitter {
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
-    answerCallbackQuery(callbackQueryId, text, showAlert, form = {}) {
+    answerCallbackQuery(form = {}) {
         // TODO: implement it with messages?
         return Promise.reject(new Error('not supported in wechat'));
     }
