@@ -194,20 +194,26 @@ class WechatyTelegramBot extends EventEmitter {
     constructor(profile = null, options = {}) {
         super();
 
+        const defaultOption = (root, key, value) => {
+            if (typeof root[key] === 'undefined') {
+                root[key] = value;
+            }
+        };
+
         this.options = options;
-        if (options.polling && typeof options.polling.autoStart === 'undefined') {
-            options.polling.autoStart = true;
+        defaultOption(this.options, 'polling', false);
+        if (this.options.polling) {
+            defaultOption(this.options.polling, 'autoStart', true);
         }
-        if (options.webHook && typeof options.webHook.autoOpen === 'undefined') {
-            options.webHook.autoOpen = true;
+        defaultOption(this.options, 'webHook', false);
+        if (this.options.webHook) {
+            defaultOption(this.options.webHook, 'autoOpen', true);
         }
-        this.options.wechaty = this.options.wechaty || {};
-        if (typeof this.options.wechaty.profile === 'undefined') {
-            this.options.wechaty.profile = profile;
-        }
-        if (typeof this.options.wechaty.autoFriend === 'undefined') {
-            this.options.wechaty.autoFriend = true;
-        }
+        defaultOption(this.options, 'onlyFirstMatch', false);
+        // defaultOption(this.options, 'filepath', true); // TODO
+        defaultOption(this.options, 'wechaty', {});
+        defaultOption(this.options.wechaty, 'profile', profile);
+        defaultOption(this.options.wechaty, 'autoFriend', true);
         // TODO: allow slient fail if wechat does not support the method
 
         // notice: wechaty supports singleton only
@@ -321,11 +327,11 @@ class WechatyTelegramBot extends EventEmitter {
             },
         };
 
-        if (options.polling && options.polling.autoStart) {
+        if (this.options.polling && this.options.polling.autoStart) {
             this.startPolling();
         }
 
-        if (options.webHook && options.webHook.autoOpen) {
+        if (this.options.webHook && this.options.webHook.autoOpen) {
             this.openWebHook();
         }
     }
