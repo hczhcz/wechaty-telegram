@@ -1,7 +1,5 @@
 'use strict';
 
-const fs = require('fs');
-
 const EventEmitter = require('events');
 const wechaty = require('wechaty');
 
@@ -217,7 +215,6 @@ class WechatyTelegramBot extends EventEmitter {
         // TODO: allow slient fail if wechat does not support the method
 
         // notice: wechaty supports singleton only
-        // this.wechaty = new wechaty.Wechaty(this.options.wechaty);
         this.wechaty = wechaty.Wechaty.instance(this.options.wechaty);
 
         // other events: 'heartbeat', 'login', 'logout', 'scan'
