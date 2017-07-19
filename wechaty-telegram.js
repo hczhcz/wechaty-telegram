@@ -219,12 +219,12 @@ class WechatyTelegramBot extends EventEmitter {
 
         // other events: 'heartbeat', 'login', 'logout', 'scan'
         this.wechaty.on('error', (err) => {
-            if (this.listeners('polling_error').length) {
+            if (this._mode === 'polling') {
                 this.emit('polling_error', err);
-            } else if (this.listeners('webhook_error').length) {
+            } else if (this._mode === 'webhook') {
                 this.emit('webhook_error', err);
             } else {
-                console.error(err);
+                this.emit('standby_error', err); // notice: custom event
             }
         }).on('friend', (contact, request) => {
             if (request && this.options.wechaty.autoFriend) {
@@ -297,6 +297,7 @@ class WechatyTelegramBot extends EventEmitter {
             });
         });
 
+        this._mode = 'standby';
         this._textRegexpCallbacks = [];
         this._replyListeners = [];
 
@@ -336,12 +337,18 @@ class WechatyTelegramBot extends EventEmitter {
     // ======== polling ========
 
     startPolling(options = {}) {
-        if (options.restart) {
+        if (this.hasOpenWebHook()) {
+            return Promise.reject(new errors.FatalError('polling and webhook are mutually exclusive'));
+        } else if (options.restart) {
             return this.stopPolling().then(() => {
-                return this.wechaty.init();
+                return this.wechaty.init().then(() => {
+                    this._mode = 'polling';
+                });
             });
         } else {
-            return this.wechaty.init();
+            return this.wechaty.init().then(() => {
+                this._mode = 'polling';
+            });
         }
     }
 
@@ -351,11 +358,13 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     stopPolling() {
+        this._mode = 'standby';
+
         return this.wechaty.quit();
     }
 
     isPolling() {
-        return this.wechaty.state.current() === 'ready';
+        return this._mode === 'polling' && this.wechaty.state.current() === 'ready';
     }
 
     getUpdates(form = {}) {
@@ -365,15 +374,23 @@ class WechatyTelegramBot extends EventEmitter {
     // ======== web hook ========
 
     openWebHook() {
-        return this.wechaty.init();
+        if (this.isPolling()) {
+            return Promise.reject(new errors.FatalError('polling and webhook are mutually exclusive'));
+        } else {
+            return this.wechaty.init().then(() => {
+                this._mode = 'webhook';
+            });
+        }
     }
 
     closeWebHook() {
+        this._mode = 'standby';
+
         return this.wechaty.quit();
     }
 
     hasOpenWebHook() {
-        return this.wechaty.state.current() === 'ready';
+        return this._mode === 'webhook' && this.wechaty.state.current() === 'ready';
     }
 
     setWebHook(url, options = {}) {
