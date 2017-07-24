@@ -192,6 +192,12 @@ class WechatyTelegramBot extends EventEmitter {
     constructor(profile = null, options = {}) {
         super();
 
+        const objectOption = (root, key) => {
+            if (root[key] === true) {
+                root[key] = {};
+            }
+        };
+
         const defaultOption = (root, key, value) => {
             if (typeof root[key] === 'undefined') {
                 root[key] = value;
@@ -200,16 +206,19 @@ class WechatyTelegramBot extends EventEmitter {
 
         this.options = options;
         defaultOption(this.options, 'polling', false);
+        objectOption(this.options, 'polling');
         if (this.options.polling) {
             defaultOption(this.options.polling, 'autoStart', true);
         }
         defaultOption(this.options, 'webHook', false);
+        objectOption(this.options, 'webHook');
         if (this.options.webHook) {
             defaultOption(this.options.webHook, 'autoOpen', true);
         }
         defaultOption(this.options, 'onlyFirstMatch', false);
         // defaultOption(this.options, 'filepath', true); // TODO
         defaultOption(this.options, 'wechaty', {});
+        objectOption(this.options, 'wechaty');
         defaultOption(this.options.wechaty, 'profile', profile);
         defaultOption(this.options.wechaty, 'autoFriend', true);
         defaultOption(this.options.wechaty, 'forwardWithAt', true);
