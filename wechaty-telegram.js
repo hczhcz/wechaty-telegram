@@ -212,6 +212,7 @@ class WechatyTelegramBot extends EventEmitter {
         defaultOption(this.options, 'wechaty', {});
         defaultOption(this.options.wechaty, 'profile', profile);
         defaultOption(this.options.wechaty, 'autoFriend', true);
+        defaultOption(this.options.wechaty, 'forwardWithAt', true);
         // TODO: allow slient fail if wechat does not support the method
 
         // notice: wechaty supports singleton only
@@ -600,7 +601,7 @@ class WechatyTelegramBot extends EventEmitter {
 
         if (forwardMessage) {
             return this.sendMessage(chatId, forwardMessage.content(), {
-                reply_to_message_id: messageId,
+                reply_to_message_id: this.options.wechaty.forwardWithAt ? messageId : null,
             }).then((message) => {
                 message.forward_from = forwardMessage.tgMessage.from;
                 message.forward_from_chat = forwardMessage.tgMessage.chat;
