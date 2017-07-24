@@ -1,6 +1,6 @@
 {
   "name": "wechaty-telegram",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Run your Telegram bot on WeChat",
   "main": "wechaty-telegram.js",
   "dependencies": {
