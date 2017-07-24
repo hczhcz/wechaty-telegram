@@ -1,0 +1,30 @@
+{
+  "name": "wechaty-telegram",
+  "version": "1.0.0",
+  "description": "Run your Telegram bot on WeChat",
+  "main": "wechaty-telegram.js",
+  "dependencies": {
+    "chromedriver": "^2.30.1",
+    "wechaty": "^0.8.129"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hczhcz/wechaty-telegram.git"
+  },
+  "keywords": [
+    "telegram",
+    "wechat",
+    "bot",
+    "wechaty"
+  ],
+  "author": "hczhcz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hczhcz/wechaty-telegram/issues"
+  },
+  "homepage": "https://github.com/hczhcz/wechaty-telegram#readme"
+}
