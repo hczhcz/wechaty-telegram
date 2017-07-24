@@ -94,36 +94,11 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     _tgChatContact(contact) {
-        let id = null;
+        const chat = this._tgUserContact(contact);
 
-        if (String(contact.alias()).match(/^#\d+/)) {
-            id = parseInt(contact.alias().slice(1), 10);
-        } else {
-            // notice: may affect the performance
-            for (const i in this._buffers.contact) {
-                if (this._buffers.contact[i].id === contact.id) {
-                    id = i;
-                    this._buffers.contact[i] = contact; // update
+        chat.type = 'private';
 
-                    break;
-                }
-            }
-
-            if (!id) {
-                id = this._uniqueId('contact', contact);
-
-                if (this.options.wechaty.autoAlias) {
-                    contact.alias('#' + id);
-                }
-            }
-        }
-
-        return {
-            id: id,
-            type: 'private',
-            first_name: contact.name(),
-            // username: contact.weixin(),
-        };
+        return chat;
     }
 
     _tgChatRoom(room) {
