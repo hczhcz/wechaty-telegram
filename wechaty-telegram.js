@@ -67,8 +67,23 @@ class WechatyTelegramBot extends EventEmitter {
         if (String(contact.alias()).match(/^#\d+/)) {
             id = parseInt(contact.alias().slice(1), 10);
         } else {
-            id = this._uniqueId('contact', contact);
-            contact.alias('#' + id);
+            // notice: may affect the performance
+            for (const i in this._buffers.contact) {
+                if (this._buffers.contact[i].id === contact.id) {
+                    id = i;
+                    this._buffers.contact[i] = contact; // update
+
+                    break;
+                }
+            }
+
+            if (!id) {
+                id = this._uniqueId('contact', contact);
+
+                if (this.options.wechaty.autoAlias) {
+                    contact.alias('#' + id);
+                }
+            }
         }
 
         return {
@@ -84,8 +99,23 @@ class WechatyTelegramBot extends EventEmitter {
         if (String(contact.alias()).match(/^#\d+/)) {
             id = parseInt(contact.alias().slice(1), 10);
         } else {
-            id = this._uniqueId('contact', contact);
-            contact.alias('#' + id);
+            // notice: may affect the performance
+            for (const i in this._buffers.contact) {
+                if (this._buffers.contact[i].id === contact.id) {
+                    id = i;
+                    this._buffers.contact[i] = contact; // update
+
+                    break;
+                }
+            }
+
+            if (!id) {
+                id = this._uniqueId('contact', contact);
+
+                if (this.options.wechaty.autoAlias) {
+                    contact.alias('#' + id);
+                }
+            }
         }
 
         return {
@@ -220,6 +250,7 @@ class WechatyTelegramBot extends EventEmitter {
         defaultOption(this.options, 'wechaty', {});
         objectOption(this.options, 'wechaty');
         defaultOption(this.options.wechaty, 'profile', profile);
+        defaultOption(this.options.wechaty, 'autoAlias', true);
         defaultOption(this.options.wechaty, 'autoFriend', true);
         defaultOption(this.options.wechaty, 'forwardWithAt', true);
         // TODO: allow slient fail if wechat does not support the method
