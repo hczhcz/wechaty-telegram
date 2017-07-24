@@ -165,7 +165,7 @@ class WechatyTelegramBot extends EventEmitter {
                 // data in the buffer may be out of date
                 return this._buffers.contact[userId];
             } else {
-                return new Error('contact not found');
+                return new errors.TelegramError('contact not found');
             }
         });
     }
@@ -182,7 +182,7 @@ class WechatyTelegramBot extends EventEmitter {
                 // data in the buffer may be out of date
                 return this._buffers.room[-chatId];
             } else {
-                return new Error('room not found');
+                return new errors.TelegramError('room not found');
             }
         });
     }
@@ -562,7 +562,7 @@ class WechatyTelegramBot extends EventEmitter {
 
                         return message;
                     } else {
-                        return new Error('failed to send message');
+                        return new errors.TelegramError('failed to send message');
                     }
                 });
             });
@@ -589,7 +589,7 @@ class WechatyTelegramBot extends EventEmitter {
 
                         return message;
                     } else {
-                        return new Error('failed to send message');
+                        return new errors.TelegramError('failed to send message');
                     }
                 });
             });
@@ -611,7 +611,7 @@ class WechatyTelegramBot extends EventEmitter {
                 return message;
             });
         } else {
-            return new Error('message not found');
+            return new errors.TelegramError('message not found');
         }
     }
 
