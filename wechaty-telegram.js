@@ -228,6 +228,7 @@ class WechatyTelegramBot extends EventEmitter {
         defaultOption(this.options.wechaty, 'autoAlias', true);
         defaultOption(this.options.wechaty, 'autoFriend', true);
         defaultOption(this.options.wechaty, 'forwardWithAt', true);
+        defaultOption(this.options.wechaty, '', true);
         // TODO: allow slient fail if wechat does not support the method
 
         // notice: wechaty supports singleton only
@@ -447,6 +448,9 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     onReplyToMessage(chatId, messageId, callback) {
+        chatId = Number(chatId);
+        messageId = Number(messageId);
+
         const id = this._uniqueId('callback');
 
         this._replyListenerId += 1;
@@ -554,6 +558,8 @@ class WechatyTelegramBot extends EventEmitter {
         // notice: parse_mode is not supported
         // TODO: reply_markup
 
+        chatId = Number(chatId);
+
         if (chatId >= 0) {
             return this._wxContact(chatId).then((contact) => {
                 const replyMessage = this._buffers.message[form.reply_to_message_id];
@@ -612,6 +618,10 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     forwardMessage(chatId, fromChatId, messageId, form = {}) {
+        chatId = Number(chatId);
+        fromChatId = Number(fromChatId);
+        messageId = Number(messageId);
+
         const forwardMessage = this._buffers.message[messageId];
 
         if (forwardMessage) {
@@ -631,50 +641,74 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     sendPhoto(chatId, photo, options = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     sendAudio(chatId, audio, options = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     sendDocument(chatId, doc, options = {}, fileOpts = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     sendSticker(chatId, sticker, options = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     sendVideo(chatId, video, options = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     sendVoice(chatId, voice, options = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     sendVideoNote(chatId, videoNote, options = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
     sendLocation(chatId, latitude, longitude, form = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not supported in wechat')); // TODO: ?
     }
 
     sendVenue(chatId, latitude, longitude, title, address, form = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
     sendContact(chatId, phoneNumber, firstName, form = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not supported in wechat')); // TODO: ?
     }
 
     sendChatAction(chatId, action) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not supported in wechat')); // TODO: ?
     }
 
     getUserProfilePhotos(userId, form = {}) {
+        userId = Number(userId);
+
         return Promise.reject(new Error('not supported in wechat')); // TODO: ?
     }
 
@@ -684,67 +718,105 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     kickChatMember(chatId, userId) {
+        chatId = Number(chatId);
+        userId = Number(userId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     unbanChatMember(chatId, userId) {
         // TODO: implement as inviting chat member
+        chatId = Number(chatId);
+        userId = Number(userId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     restrictChatMember(chatId, userId, form = {}) {
+        chatId = Number(chatId);
+        userId = Number(userId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
     promoteChatMember(chatId, userId, form = {}) {
+        chatId = Number(chatId);
+        userId = Number(userId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
     exportChatInviteLink(chatId, form = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
     setChatPhoto(chatId, photo, options = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
     deleteChatPhoto(chatId, form = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
     setChatTitle(chatId, title, form = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     setChatDescription(chatId, description, form = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
     pinChatMessage(chatId, messageId, form = {}) {
+        chatId = Number(chatId);
+        messageId = Number(messageId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
     unpinChatMessage(chatId, form = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
     leaveChat(chatId) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     getChat(chatId) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     getChatAdministrators(chatId) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     getChatMembersCount(chatId) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     getChatMember(chatId, userId) {
+        chatId = Number(chatId);
+        userId = Number(userId);
+
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
@@ -769,6 +841,9 @@ class WechatyTelegramBot extends EventEmitter {
 
     deleteMessage(chatId, messageId, form = {}) {
         // TODO: recall the message?
+        chatId = Number(chatId);
+        messageId = Number(messageId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
@@ -782,6 +857,8 @@ class WechatyTelegramBot extends EventEmitter {
     // ======== methods: payments ========
 
     sendInvoice(chatId, title, description, payload, providerToken, startParameter, currency, prices, form = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
@@ -796,14 +873,20 @@ class WechatyTelegramBot extends EventEmitter {
     // ======== methods: games ========
 
     sendGame(chatId, gameShortName, form = {}) {
+        chatId = Number(chatId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
     setGameScore(userId, score, form = {}) {
+        userId = Number(userId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
     getGameHighScores(userId, form = {}) {
+        userId = Number(userId);
+
         return Promise.reject(new Error('not supported in wechat'));
     }
 
