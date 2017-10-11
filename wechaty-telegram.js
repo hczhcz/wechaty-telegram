@@ -658,12 +658,6 @@ class WechatyTelegramBot extends EventEmitter {
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
-    sendSticker(chatId, sticker, options = {}) {
-        chatId = Number(chatId);
-
-        return Promise.reject(new Error('not implemented')); // TODO
-    }
-
     sendVideo(chatId, video, options = {}) {
         chatId = Number(chatId);
 
@@ -845,6 +839,52 @@ class WechatyTelegramBot extends EventEmitter {
         messageId = Number(messageId);
 
         return Promise.reject(new Error('not supported in wechat'));
+    }
+
+    // ======== methods: stickers ========
+
+    sendSticker(chatId, sticker, options = {}) {
+        chatId = Number(chatId);
+
+        return Promise.reject(new Error('not implemented')); // TODO
+    }
+
+    getStickerSet(name, options = {}) {
+        return Promise.reject(new Error('not implemented')); // TODO
+    }
+
+    uploadStickerFile(userId, pngSticker, options = {}) {
+        userId = Number(userId);
+
+        return Promise.reject(new Error('not implemented')); // TODO
+    }
+
+    // TODO: not implemented in node-telegram-bot-api
+    createNewStickerSet(userId, name, title, pngSticker, emojis, options = {}) {
+        userId = Number(userId);
+
+        return Promise.reject(new Error('not implemented')); // TODO
+    }
+
+    // TODO: not implemented in node-telegram-bot-api
+    addStickerToSet(userId, name, pngSticker, emojis, options = {}) {
+        userId = Number(userId);
+
+        return Promise.reject(new Error('not implemented')); // TODO
+    }
+
+    // TODO: not implemented in node-telegram-bot-api
+    setStickerPositionInSet(sticker, position) {
+        userId = Number(userId);
+
+        return Promise.reject(new Error('not implemented')); // TODO
+    }
+
+    // TODO: not implemented in node-telegram-bot-api
+    deleteStickerFromSet(sticker) {
+        userId = Number(userId);
+
+        return Promise.reject(new Error('not implemented')); // TODO
     }
 
     // ======== methods: inline mode ========
