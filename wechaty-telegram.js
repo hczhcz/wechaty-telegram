@@ -47,8 +47,7 @@ class WechatyTelegramBot extends EventEmitter {
         const buffer = this._buffers[key];
 
         while (Date.now() === buffer.last) {
-            // spin
-            // Date.now() should not be less than buffer.last
+            // spin, Date.now() should not be less than buffer.last
         }
 
         buffer.last += 1;
@@ -166,12 +165,14 @@ class WechatyTelegramBot extends EventEmitter {
         }).then((contact) => {
             if (contact) {
                 return contact;
-            } else if (this._buffers.contact[userId]) {
+            }
+
+            if (this._buffers.contact[userId]) {
                 // data in the buffer may be out of date
                 return this._buffers.contact[userId];
-            } else {
-                return new errors.TelegramError('contact not found');
             }
+
+            return new errors.TelegramError('contact not found');
         });
     }
 
@@ -183,12 +184,14 @@ class WechatyTelegramBot extends EventEmitter {
         }).then((room) => {
             if (room) {
                 return room;
-            } else if (this._buffers.room[-chatId]) {
+            }
+
+            if (this._buffers.room[-chatId]) {
                 // data in the buffer may be out of date
                 return this._buffers.room[-chatId];
-            } else {
-                return new errors.TelegramError('room not found');
             }
+
+            return new errors.TelegramError('room not found');
         });
     }
 
@@ -356,17 +359,19 @@ class WechatyTelegramBot extends EventEmitter {
     startPolling(options = {}) {
         if (this.hasOpenWebHook()) {
             return Promise.reject(new errors.FatalError('polling and webhook are mutually exclusive'));
-        } else if (options.restart) {
+        }
+
+        if (options.restart) {
             return this.stopPolling().then(() => {
                 return this.wechaty.init().then(() => {
                     this._mode = 'polling';
                 });
             });
-        } else {
-            return this.wechaty.init().then(() => {
-                this._mode = 'polling';
-            });
         }
+
+        return this.wechaty.init().then(() => {
+            this._mode = 'polling';
+        });
     }
 
     // deprecated
@@ -393,11 +398,11 @@ class WechatyTelegramBot extends EventEmitter {
     openWebHook() {
         if (this.isPolling()) {
             return Promise.reject(new errors.FatalError('polling and webhook are mutually exclusive'));
-        } else {
-            return this.wechaty.init().then(() => {
-                this._mode = 'webhook';
-            });
         }
+
+        return this.wechaty.init().then(() => {
+            this._mode = 'webhook';
+        });
     }
 
     closeWebHook() {
@@ -442,9 +447,9 @@ class WechatyTelegramBot extends EventEmitter {
 
         if (index >= 0) {
             return this._textRegexpCallbacks.splice(index, 1)[0];
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     onReplyToMessage(chatId, messageId, callback) {
@@ -472,9 +477,9 @@ class WechatyTelegramBot extends EventEmitter {
 
         if (index >= 0) {
             return this._replyListeners.splice(index, 1)[0];
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     // ======== updating ========
@@ -498,9 +503,9 @@ class WechatyTelegramBot extends EventEmitter {
                         reg.callback(update.message, result);
 
                         return this.options.onlyFirstMatch;
-                    } else {
-                        return false;
                     }
+
+                    return false;
                 });
             }
 
@@ -582,39 +587,39 @@ class WechatyTelegramBot extends EventEmitter {
                         }
 
                         return message;
-                    } else {
-                        return new errors.TelegramError('failed to send message');
                     }
-                });
-            });
-        } else {
-            return this._wxRoom(chatId).then((room) => {
-                const replyMessage = this._buffers.message[form.reply_to_message_id];
-                const reply = replyMessage ? replyMessage.from() : null;
 
-                return room.say(text, reply).then((succeed) => {
-                    if (succeed) {
-                        const message = {
-                            message_id: this._uniqueId('message'),
-                            from: this._tgUserContact(this.wechaty.self()),
-                            date: Date.now(),
-                            chat: this._tgChatRoom(room),
-                            text: text,
-                            // TODO: other content types
-                            entities: [],
-                        };
-
-                        if (replyMessage) {
-                            message.reply_to_message = replyMessage.tgMessage;
-                        }
-
-                        return message;
-                    } else {
-                        return new errors.TelegramError('failed to send message');
-                    }
+                    return new errors.TelegramError('failed to send message');
                 });
             });
         }
+
+        return this._wxRoom(chatId).then((room) => {
+            const replyMessage = this._buffers.message[form.reply_to_message_id];
+            const reply = replyMessage ? replyMessage.from() : null;
+
+            return room.say(text, reply).then((succeed) => {
+                if (succeed) {
+                    const message = {
+                        message_id: this._uniqueId('message'),
+                        from: this._tgUserContact(this.wechaty.self()),
+                        date: Date.now(),
+                        chat: this._tgChatRoom(room),
+                        text: text,
+                        // TODO: other content types
+                        entities: [],
+                    };
+
+                    if (replyMessage) {
+                        message.reply_to_message = replyMessage.tgMessage;
+                    }
+
+                    return message;
+                }
+
+                return new errors.TelegramError('failed to send message');
+            });
+        });
     }
 
     forwardMessage(chatId, fromChatId, messageId, form = {}) {
@@ -635,9 +640,9 @@ class WechatyTelegramBot extends EventEmitter {
 
                 return message;
             });
-        } else {
-            return new errors.TelegramError('message not found');
         }
+
+        return new errors.TelegramError('message not found');
     }
 
     sendPhoto(chatId, photo, options = {}) {
@@ -875,14 +880,14 @@ class WechatyTelegramBot extends EventEmitter {
 
     // TODO: not implemented in node-telegram-bot-api
     setStickerPositionInSet(sticker, position) {
-        userId = Number(userId);
+        // userId = Number(userId);
 
         return Promise.reject(new Error('not implemented')); // TODO
     }
 
     // TODO: not implemented in node-telegram-bot-api
     deleteStickerFromSet(sticker) {
-        userId = Number(userId);
+        // userId = Number(userId);
 
         return Promise.reject(new Error('not implemented')); // TODO
     }
