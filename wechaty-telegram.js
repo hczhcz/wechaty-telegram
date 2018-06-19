@@ -15,12 +15,14 @@ const _messageTypes = [
     'group_chat_created',
     'invoice',
     'left_chat_member',
-    // 'left_chat_participant', // deprecated
+    // note: deprecated
+    // 'left_chat_participant',
     'location',
     'migrate_from_chat_id',
     'migrate_to_chat_id',
     'new_chat_members',
-    // 'new_chat_participant', // deprecated
+    // note: deprecated
+    // 'new_chat_participant',
     'new_chat_photo',
     'new_chat_title',
     'photo',
@@ -70,7 +72,8 @@ class WechatyTelegramBot extends EventEmitter {
             for (const i in this._buffers.contact) {
                 if (this._buffers.contact[i].id === contact.id) {
                     id = i;
-                    this._buffers.contact[i] = contact; // update
+                    // update
+                    this._buffers.contact[i] = contact;
 
                     break;
                 }
@@ -110,7 +113,8 @@ class WechatyTelegramBot extends EventEmitter {
             for (const i in this._buffers.room) {
                 if (this._buffers.room[i].id === room.id) {
                     id = i;
-                    this._buffers.room[i] = room; // update
+                    // update
+                    this._buffers.room[i] = room;
 
                     break;
                 }
@@ -138,8 +142,9 @@ class WechatyTelegramBot extends EventEmitter {
         message.mentioned().forEach((contact) => {
             entities.push({
                 type: 'text_mention',
-                offset: 0, // TODO
-                length: 0, // TODO
+                // TODO
+                offset: 0,
+                length: 0,
                 user: this._tgUserContact(contact),
             });
         });
@@ -224,7 +229,8 @@ class WechatyTelegramBot extends EventEmitter {
             defaultOption(this.options.webHook, 'autoOpen', true);
         }
         defaultOption(this.options, 'onlyFirstMatch', false);
-        // defaultOption(this.options, 'filepath', true); // TODO
+        // TODO
+        // defaultOption(this.options, 'filepath', true);
         defaultOption(this.options, 'wechaty', {});
         objectOption(this.options, 'wechaty');
         defaultOption(this.options.wechaty, 'profile', profile);
@@ -244,7 +250,8 @@ class WechatyTelegramBot extends EventEmitter {
             } else if (this._mode === 'webhook') {
                 this.emit('webhook_error', err);
             } else {
-                this.emit('standby_error', err); // notice: custom event
+                // notice: custom event
+                this.emit('standby_error', err);
             }
         }).on('friend', (contact, request) => {
             if (request && this.options.wechaty.autoFriend) {
@@ -297,7 +304,8 @@ class WechatyTelegramBot extends EventEmitter {
                     update_id: this._uniqueId('update'),
                     message: {
                         message_id: this._uniqueId('sysmessage'),
-                        from: this._tgUserContact(leaver), // notice: can not detect admin kicking
+                        // notice: can not detect admin kicking
+                        from: this._tgUserContact(leaver),
                         date: Date.now(),
                         chat: this._tgChatRoom(room),
                         left_chat_member: this._tgUserContact(leaver),
@@ -358,7 +366,9 @@ class WechatyTelegramBot extends EventEmitter {
 
     startPolling(options = {}) {
         if (this.hasOpenWebHook()) {
-            return Promise.reject(new errors.FatalError('polling and webhook are mutually exclusive'));
+            return Promise.reject(new errors.FatalError(
+                'polling and webhook are mutually exclusive'
+            ));
         }
 
         if (options.restart) {
@@ -386,7 +396,8 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     isPolling() {
-        return this._mode === 'polling' && this.wechaty.state.current() === 'ready';
+        return this._mode === 'polling'
+            && this.wechaty.state.current() === 'ready';
     }
 
     getUpdates(form = {}) {
@@ -397,7 +408,9 @@ class WechatyTelegramBot extends EventEmitter {
 
     openWebHook() {
         if (this.isPolling()) {
-            return Promise.reject(new errors.FatalError('polling and webhook are mutually exclusive'));
+            return Promise.reject(new errors.FatalError(
+                'polling and webhook are mutually exclusive'
+            ));
         }
 
         return this.wechaty.init().then(() => {
@@ -412,7 +425,8 @@ class WechatyTelegramBot extends EventEmitter {
     }
 
     hasOpenWebHook() {
-        return this._mode === 'webhook' && this.wechaty.state.current() === 'ready';
+        return this._mode === 'webhook'
+            && this.wechaty.state.current() === 'ready';
     }
 
     setWebHook(url, options = {}) {
@@ -567,10 +581,12 @@ class WechatyTelegramBot extends EventEmitter {
 
         if (chatId >= 0) {
             return this._wxContact(chatId).then((contact) => {
-                const replyMessage = this._buffers.message[form.reply_to_message_id];
-                const reply = replyMessage ? replyMessage.from() : null;
+                const reply = this._buffers.message[form.reply_to_message_id];
+                const replyFrom = reply
+                    ? reply.from()
+                    : null;
 
-                return contact.say(text, reply).then((succeed) => {
+                return contact.say(text, replyFrom).then((succeed) => {
                     if (succeed) {
                         const message = {
                             message_id: this._uniqueId('message'),
@@ -582,8 +598,8 @@ class WechatyTelegramBot extends EventEmitter {
                             entities: [],
                         };
 
-                        if (replyMessage) {
-                            message.reply_to_message = replyMessage.tgMessage;
+                        if (reply) {
+                            message.reply_to_message = reply.tgMessage;
                         }
 
                         return message;
@@ -595,10 +611,12 @@ class WechatyTelegramBot extends EventEmitter {
         }
 
         return this._wxRoom(chatId).then((room) => {
-            const replyMessage = this._buffers.message[form.reply_to_message_id];
-            const reply = replyMessage ? replyMessage.from() : null;
+            const reply = this._buffers.message[form.reply_to_message_id];
+            const replyFrom = reply
+                ? reply.from()
+                : null;
 
-            return room.say(text, reply).then((succeed) => {
+            return room.say(text, replyFrom).then((succeed) => {
                 if (succeed) {
                     const message = {
                         message_id: this._uniqueId('message'),
@@ -610,8 +628,8 @@ class WechatyTelegramBot extends EventEmitter {
                         entities: [],
                     };
 
-                    if (replyMessage) {
-                        message.reply_to_message = replyMessage.tgMessage;
+                    if (reply) {
+                        message.reply_to_message = reply.tgMessage;
                     }
 
                     return message;
@@ -631,7 +649,9 @@ class WechatyTelegramBot extends EventEmitter {
 
         if (forwardMessage) {
             return this.sendMessage(chatId, forwardMessage.content(), {
-                reply_to_message_id: this.options.wechaty.forwardWithAt ? messageId : null,
+                reply_to_message_id: this.options.wechaty.forwardWithAt
+                    ? messageId
+                    : null,
             }).then((message) => {
                 message.forward_from = forwardMessage.tgMessage.from;
                 message.forward_from_chat = forwardMessage.tgMessage.chat;
@@ -648,31 +668,31 @@ class WechatyTelegramBot extends EventEmitter {
     sendPhoto(chatId, photo, options = {}) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     sendAudio(chatId, audio, options = {}) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     sendDocument(chatId, doc, options = {}, fileOpts = {}) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     sendVideo(chatId, video, options = {}) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     sendVoice(chatId, voice, options = {}) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     sendVideoNote(chatId, videoNote, options = {}) {
@@ -684,7 +704,8 @@ class WechatyTelegramBot extends EventEmitter {
     sendLocation(chatId, latitude, longitude, form = {}) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not supported in wechat')); // TODO: ?
+        // TODO: ?
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     sendVenue(chatId, latitude, longitude, title, address, form = {}) {
@@ -696,19 +717,22 @@ class WechatyTelegramBot extends EventEmitter {
     sendContact(chatId, phoneNumber, firstName, form = {}) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not supported in wechat')); // TODO: ?
+        // TODO: ?
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     sendChatAction(chatId, action) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not supported in wechat')); // TODO: ?
+        // TODO: ?
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     getUserProfilePhotos(userId, form = {}) {
         userId = Number(userId);
 
-        return Promise.reject(new Error('not supported in wechat')); // TODO: ?
+        // TODO: ?
+        return Promise.reject(new Error('not supported in wechat'));
     }
 
     getFile(fileId) {
@@ -720,7 +744,7 @@ class WechatyTelegramBot extends EventEmitter {
         chatId = Number(chatId);
         userId = Number(userId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     unbanChatMember(chatId, userId) {
@@ -728,7 +752,7 @@ class WechatyTelegramBot extends EventEmitter {
         chatId = Number(chatId);
         userId = Number(userId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     restrictChatMember(chatId, userId, form = {}) {
@@ -766,7 +790,7 @@ class WechatyTelegramBot extends EventEmitter {
     setChatTitle(chatId, title, form = {}) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     setChatDescription(chatId, description, form = {}) {
@@ -791,32 +815,32 @@ class WechatyTelegramBot extends EventEmitter {
     leaveChat(chatId) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     getChat(chatId) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     getChatAdministrators(chatId) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     getChatMembersCount(chatId) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     getChatMember(chatId, userId) {
         chatId = Number(chatId);
         userId = Number(userId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     answerCallbackQuery(form = {}) {
@@ -851,45 +875,45 @@ class WechatyTelegramBot extends EventEmitter {
     sendSticker(chatId, sticker, options = {}) {
         chatId = Number(chatId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     getStickerSet(name, options = {}) {
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     uploadStickerFile(userId, pngSticker, options = {}) {
         userId = Number(userId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     // TODO: not implemented in node-telegram-bot-api
     createNewStickerSet(userId, name, title, pngSticker, emojis, options = {}) {
         userId = Number(userId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     // TODO: not implemented in node-telegram-bot-api
     addStickerToSet(userId, name, pngSticker, emojis, options = {}) {
         userId = Number(userId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     // TODO: not implemented in node-telegram-bot-api
     setStickerPositionInSet(sticker, position) {
         // userId = Number(userId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     // TODO: not implemented in node-telegram-bot-api
     deleteStickerFromSet(sticker) {
         // userId = Number(userId);
 
-        return Promise.reject(new Error('not implemented')); // TODO
+        return Promise.reject(new Error('not implemented'));
     }
 
     // ======== methods: inline mode ========
@@ -901,7 +925,17 @@ class WechatyTelegramBot extends EventEmitter {
 
     // ======== methods: payments ========
 
-    sendInvoice(chatId, title, description, payload, providerToken, startParameter, currency, prices, form = {}) {
+    sendInvoice(
+        chatId,
+        title,
+        description,
+        payload,
+        providerToken,
+        startParameter,
+        currency,
+        prices,
+        form = {}
+    ) {
         chatId = Number(chatId);
 
         return Promise.reject(new Error('not supported in wechat'));
@@ -941,14 +975,15 @@ class WechatyTelegramBot extends EventEmitter {
         // TODO
         return this.getFile(fileId).then((file) => {
             return null;
-            // return this.options.baseApiUrl + '/file/bot' + this.token + '/' + resp.file_path;
+            // return this.options.baseApiUrl
+            //     + '/file/bot' + this.token + '/' + resp.file_path;
         });
     }
 
     downloadFile(fileId, downloadDir) {
-        // TODO
         return this.getFile(fileId).then((file) => {
-            return null; // TODO: return the downloaded file path
+            // TODO: return the downloaded file path
+            return null;
         });
     }
 }
